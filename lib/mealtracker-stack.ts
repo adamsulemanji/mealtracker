@@ -1,16 +1,31 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-// import * as sqs from 'aws-cdk-lib/aws-sqs';
+import { ApiGatewayConstruct } from './apigateway';
+import { LambdaConstruct } from './lambda';
+import { DynamoDBConstruct } from './ddb';
+import { FrontendConstruct } from './cloudfront';
 
 export class MealtrackerStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    // The code that defines your stack goes here
+    // ********** DynamoDB **********
+    const ddb = new DynamoDBConstruct(this, 'DynamoDBConstruct');
 
-    // example resource
-    // const queue = new sqs.Queue(this, 'MealtrackerQueue', {
-    //   visibilityTimeout: cdk.Duration.seconds(300)
-    // });
+    // ********** Lambda **********
+    const lambda = new LambdaConstruct(this, 'LambdaConstruct', [ddb.mealsTable]);
+
+    // ********** API Gateway **********
+    new ApiGatewayConstruct(this, 'ApiGatewayConstruct', lambda.meals);
+
+    // ********** Frontend **********
+    new FrontendConstruct(this, 'FrontendConstruct');
+
+    // ********** Grant Permissions **********
+
+    ddb.mealsTable.grantFullAccess(lambda.meals);
+    lambda.meals
+
+
   }
 }
