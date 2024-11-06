@@ -6,6 +6,7 @@ import axios from "axios"
 import { DatePickerDemo } from "./DatePicker"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { useToast } from "@/hooks/use-toast"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
@@ -17,24 +18,35 @@ interface NewMealInfo {
   date: Date
 }
 
+
 export function NewMeal() {
   const [meal, setMeal] = React.useState<NewMealInfo>({
     mealName: "",
     mealType: "breakfast",
     eatingOut: false,
     date: new Date(),
-  })
+  });
 
   const handleDateChange = (selectedDate: Date) => {
     setMeal((prevMeal) => ({ ...prevMeal, date: selectedDate }))
   }
 
-  const handleSubmit = () => {
-    console.log(meal);
-    axios.post("http://localhost:3001/meals", meal).then((response) => {
-      console.log(response);
-    });
-  }
+const { toast } = useToast();
+
+const handleSubmit = () => {
+    axios.post("https://fzyeqnxwpg.execute-api.us-east-1.amazonaws.com/prod/meals", meal)
+        .then((response) => {
+            console.log(response);
+        })
+        .catch((error) => {
+            toast({
+                variant: "destructive",
+                title: "Uh oh! Something went wrong.",
+                description: "There was a problem with your request."
+              })
+            console.error(error);
+        });
+}
 
   return (
     <Dialog>
