@@ -62,11 +62,11 @@ const handler = async (event) => {
         }
       }
 
-      const mealId = generateUUID();
+      const mealID = generateUUID();
       const params = {
         TableName: TABLE_NAME,
         Item: {
-          mealId: { S: mealId },
+          mealID: { S: mealID },
           mealType: { S: requestBody.mealType },
           mealName: { S: requestBody.mealName },
           eatingOut: { BOOL: requestBody.eatingOut },
