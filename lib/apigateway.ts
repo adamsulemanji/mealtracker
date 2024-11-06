@@ -36,6 +36,10 @@ export class ApiGatewayConstruct extends Construct {
     const getAllMealsIntegration = new apigateway.LambdaIntegration(lambdaFunction);
     meals.addMethod('GET', getAllMealsIntegration);
 
+    // POST /meals - Create a new meal
+    const createMealIntegration = new apigateway.LambdaIntegration(lambdaFunction);
+    meals.addMethod('POST', createMealIntegration);
+
     // Resource: /meals/{id}
     const mealById = meals.addResource('{id}');
 

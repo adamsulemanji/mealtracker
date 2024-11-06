@@ -2,6 +2,7 @@ const {
   DynamoDBClient,
   UpdateItemCommand,
   GetItemCommand,
+  PutItemCommand,
   ScanCommand,
   DeleteItemCommand,
 } = require('@aws-sdk/client-dynamodb');

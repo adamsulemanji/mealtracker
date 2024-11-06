@@ -11,6 +11,17 @@ import { useToast } from "@/hooks/use-toast";
 
 
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 
 export default function Home() {
@@ -25,13 +36,11 @@ export default function Home() {
   };
 
   const deleteAllMeals = () => {
-    axios.delete("https://localhost:3000/meals").then((response) => {
-      console.log(response);
-    });
+    console.log("Deleting all meals");
     toast({
       title: "Deleted all meals",
       description: "You have successfully deleted all meals",
-    })
+    });
   };
 
   return (
@@ -44,7 +53,24 @@ export default function Home() {
         </div>
         <div className="flex gap-4 items-center flex-col sm:flex-row">
           < NewMeal />
-          <Button onClick={deleteAllMeals}>Delete All Meals</Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button>Delete All Meals</Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete your account
+                  and remove your data from our servers.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={deleteAllMeals}>Continue</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </main>
       <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">

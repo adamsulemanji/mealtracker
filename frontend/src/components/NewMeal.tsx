@@ -31,22 +31,22 @@ export function NewMeal() {
     setMeal((prevMeal) => ({ ...prevMeal, date: selectedDate }))
   }
 
-const { toast } = useToast();
+  const { toast } = useToast();
 
-const handleSubmit = () => {
-    axios.post("https://fzyeqnxwpg.execute-api.us-east-1.amazonaws.com/prod/meals", meal)
-        .then((response) => {
-            console.log(response);
-        })
-        .catch((error) => {
-            toast({
-                variant: "destructive",
-                title: "Uh oh! Something went wrong.",
-                description: "There was a problem with your request."
-              })
-            console.error(error);
-        });
-}
+  const handleSubmit = () => {
+      axios.post("https://fzyeqnxwpg.execute-api.us-east-1.amazonaws.com/prod/meals", meal)
+          .then((response) => {
+              console.log(response);
+          })
+          .catch((error) => {
+              toast({
+                  variant: "destructive",
+                  title: "Uh oh! Something went wrong.",
+                  description: "There was a problem with your request."
+                })
+              console.error(error);
+          });
+  }
 
   return (
     <Dialog>
