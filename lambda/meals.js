@@ -6,6 +6,7 @@ const {
   DeleteItemCommand,
 } = require('@aws-sdk/client-dynamodb');
 const { unmarshall } = require('@aws-sdk/util-dynamodb');
+const { randomUUID: generateUUID } = require('crypto');
 
 const ddbClient = new DynamoDBClient({});
 const headers = {
@@ -44,6 +45,43 @@ const handler = async (event) => {
         statusCode: 200,
         headers: headers,
         body: JSON.stringify(items),
+      };
+    } else if (method == 'POST' && resource == '/meals') {
+      // POST /meals - Create a new meal
+      let requestBody = {};
+      if (body) {
+        try {
+          requestBody = JSON.parse(body);
+        } catch (err) {
+          return {
+            statusCode: 400,
+            headers: headers,
+            body: JSON.stringify({ message: 'Invalid JSON in request body' }),
+          };
+        }
+      }
+
+      const mealId = generateUUID();
+      const params = {
+        TableName: TABLE_NAME,
+        Item: {
+          mealId: { S: mealId },
+          mealType: { S: requestBody.mealType },
+          mealName: { S: requestBody.mealName },
+          eatingOut: { BOOL: requestBody.eatingOut },
+          date: { S: requestBody.date },
+        },
+      };
+
+      await ddbClient.send(new PutItemCommand(params));
+
+      return {
+        statusCode: 201,
+        headers: headers,
+        body: JSON.stringify({
+          message: 'Meal created successfully',
+          mealId: mealId,
+        }),
       };
     } else if (method === 'GET' && resource === '/meals/{id}') {
       // GET /meals/{id} - Retrieve a meal by ID

@@ -29,12 +29,6 @@ export class ApiGatewayConstruct extends Construct {
       },
     });
 
-    // Resource: /orders
-    const orders = api.root.addResource('orders');
-    const ordersIntegration = new apigateway.LambdaIntegration(
-      lambdaFunction,
-    );
-
     // Resource: /meals
     const meals = api.root.addResource('meals');
 

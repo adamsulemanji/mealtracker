@@ -18,7 +18,7 @@ export class LambdaConstruct extends Construct {
 
     // ********** Lambda for Meals **********
     this.meals = new lambda.Function(this, 'MealsLambda', {
-      runtime: lambda.Runtime.NODEJS_16_X,
+      runtime: lambda.Runtime.NODEJS_20_X,
       handler: 'meals.handler',
       code: lambda.Code.fromAsset(path.join(__dirname, '../lambda')),
       environment: {

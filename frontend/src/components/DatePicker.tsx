@@ -20,14 +20,12 @@ interface DatePickerDemoProps {
 export function DatePickerDemo({ onDateChange }: DatePickerDemoProps) {
   const [date, setDate] = React.useState<Date>()
 
-  React.useEffect(() => {
-    if (date) {
-      console.log("Selected date:", date)
-      if (onDateChange) {
-        onDateChange(date)
-      }
+  const handleDateSelect = (selectedDate: Date) => {
+    setDate(selectedDate)
+    if (onDateChange) {
+      onDateChange(selectedDate)
     }
-  }, [date, onDateChange])
+  }
 
   return (
     <Popover>
@@ -47,7 +45,7 @@ export function DatePickerDemo({ onDateChange }: DatePickerDemoProps) {
         <Calendar
           mode="single"
           selected={date}
-          onSelect={setDate}
+          onSelect={(selectedDate) => selectedDate && handleDateSelect(selectedDate)}
           initialFocus
         />
       </PopoverContent>
