@@ -61,6 +61,7 @@ export function NewMeal() {
 				});
 				console.error(error);
 			});
+    window.location.reload();
 	};
 
 	return (
@@ -104,9 +105,9 @@ export function NewMeal() {
 							<SelectValue placeholder="Select meal type" />
 						</SelectTrigger>
 						<SelectContent>
-							<SelectItem value="breakfast">Breakfast</SelectItem>
-							<SelectItem value="lunch">Lunch</SelectItem>
-							<SelectItem value="dinner">Dinner</SelectItem>
+							<SelectItem value="Breakfast">Breakfast</SelectItem>
+							<SelectItem value="Lunch">Lunch</SelectItem>
+							<SelectItem value="Dinner">Dinner</SelectItem>
 						</SelectContent>
 					</Select>
 				</div>

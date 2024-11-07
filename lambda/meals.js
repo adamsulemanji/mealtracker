@@ -21,7 +21,7 @@ const handler = async (event) => {
   const method = event.httpMethod;
   const resource = event.resource;
   const pathParameters = event.pathParameters || '';
-  const mealId = pathParameters.id;
+  const mealID = pathParameters.id;
   const body = event.body;
 
   console.log('Event:', event);
@@ -81,17 +81,17 @@ const handler = async (event) => {
         headers: headers,
         body: JSON.stringify({
           message: 'Meal created successfully',
-          mealId: mealId,
+          mealID: mealID,
         }),
       };
     } else if (method === 'GET' && resource === '/meals/{id}') {
       // GET /meals/{id} - Retrieve a meal by ID
-      if (!mealId) {
+      if (!mealID) {
         return {
           statusCode: 400,
           headers: headers,
           body: JSON.stringify({
-            message: 'mealId is required in path parameters',
+            message: 'mealID is required in path parameters',
           }),
         };
       }
@@ -99,7 +99,7 @@ const handler = async (event) => {
       const params = {
         TableName: TABLE_NAME,
         Key: {
-          mealId: { S: mealId },
+          mealID: { S: mealID },
         },
       };
 
@@ -122,12 +122,12 @@ const handler = async (event) => {
       };
     } else if (method === 'PUT' && resource === '/meals/{id}') {
       // PUT /meals/{id} - Update a meal by ID
-      if (!mealId) {
+      if (!mealID) {
         return {
           statusCode: 400,
           headers: headers,
           body: JSON.stringify({
-            message: 'mealId is required in path parameters',
+            message: 'mealID is required in path parameters',
           }),
         };
       }
@@ -158,7 +158,7 @@ const handler = async (event) => {
       const params = {
         TableName: TABLE_NAME,
         Key: {
-          mealId: { S: mealId },
+          mealID: { S: mealID },
         },
         UpdateExpression: `SET ${updateExpressions.join(', ')}`,
         ExpressionAttributeNames: expressionAttributeNames,
@@ -173,17 +173,17 @@ const handler = async (event) => {
         headers: headers,
         body: JSON.stringify({
           message: 'Meal updated successfully',
-          mealId: mealId,
+          mealID: mealID,
         }),
       };
     } else if (method === 'DELETE' && resource === '/meals/{id}') {
       // DELETE /meals/{id} - Delete a meal by ID
-      if (!mealId) {
+      if (!mealID) {
         return {
           statusCode: 400,
           headers: headers,
           body: JSON.stringify({
-            message: 'mealId is required in path parameters',
+            message: 'mealID is required in path parameters',
           }),
         };
       }
@@ -191,7 +191,7 @@ const handler = async (event) => {
       const params = {
         TableName: TABLE_NAME,
         Key: {
-          mealId: { S: mealId },
+          mealID: { S: mealID },
         },
       };
 
@@ -202,7 +202,7 @@ const handler = async (event) => {
         headers: headers,
         body: JSON.stringify({
           message: 'Meal deleted successfully',
-          mealId: mealId,
+          mealID: mealID,
         }),
       };
     } else if (method === 'DELETE' && resource === '/meals') {
@@ -216,7 +216,7 @@ const handler = async (event) => {
         const deleteParams = {
           TableName: TABLE_NAME,
           Key: {
-            mealId: item.mealId,
+            mealID: item.mealID,
           },
         };
         return ddbClient.send(new DeleteItemCommand(deleteParams));
