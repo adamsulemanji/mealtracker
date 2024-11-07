@@ -230,6 +230,11 @@ export default function Home() {
 		setMeals(sortedMeals);
 	};
 
+	const getShortenedDayOfWeek = (date: Date) => {
+		const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+		return days[date.getDay()];
+	}
+
 	return (
 		<div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
 			<main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
@@ -253,6 +258,7 @@ export default function Home() {
 									<TableHead>Meal Type</TableHead>
 									<TableHead>Eating Out</TableHead>
 									<TableHead>Date</TableHead>
+									<TableHead>Note</TableHead>
 									<TableHead>Actions</TableHead>
 								</TableRow>
 							</TableHeader>
@@ -271,8 +277,9 @@ export default function Home() {
 												year: "2-digit",
 												month: "2-digit",
 												day: "2-digit",
-											})}
+											}) + " - " + getShortenedDayOfWeek(new Date(meal.date))}
 										</TableCell>
+										<TableCell>{meal.note || ""}</TableCell>
 										<TableCell>
 											<Button
 												onClick={() =>
@@ -289,7 +296,7 @@ export default function Home() {
 							</TableBody>
 							<TableFooter>
 								<TableRow>
-									<TableCell colSpan={4}>
+									<TableCell colSpan={5}>
 										Total Meals Tracked
 									</TableCell>
 									<TableCell className="text-right">
@@ -328,13 +335,13 @@ export default function Home() {
 								<Bar
 									dataKey="eatenOut"
 									stackId="a"
-									fill="#0284c7"
+									fill="#fbcfe8"
 									radius={4}
 								/>
 								<Bar
 									dataKey="notEatenOut"
 									stackId="a"
-									fill="#059669"
+									fill="#f9a8d4"
 									radius={4}
 								/>
 							</BarChart>

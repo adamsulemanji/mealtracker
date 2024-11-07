@@ -28,6 +28,7 @@ export interface MealInfo {
 	mealType: string;
 	eatingOut: boolean;
 	date: Date;
+	note: string;
 }
 
 interface NewMealProps {
@@ -41,6 +42,7 @@ export function NewMeal({ onAddMeal }: NewMealProps) {
 		mealType: "breakfast",
 		eatingOut: false,
 		date: new Date(),
+		note: "",
 	});
 
 	const handleDateChange = (selectedDate: Date) => {
@@ -55,7 +57,7 @@ export function NewMeal({ onAddMeal }: NewMealProps) {
 			);
 			onAddMeal(response.data);
 			setOpen(false);
-      window.location.reload();
+      		window.location.reload();
 		} catch (error) {
 			console.error(error);
 		}
@@ -120,6 +122,21 @@ export function NewMeal({ onAddMeal }: NewMealProps) {
 								eatingOut: checked,
 							}))
 						}
+					/>
+				</div>
+				<div className="mb-4">
+					<label className="block text-sm font-medium text-gray-700">
+						Note
+					</label>
+					<Input
+						value={meal.note}
+						onChange={(e) =>
+							setMeal((prevMeal) => ({
+								...prevMeal,
+								note: e.target.value,
+							}))
+						}
+						placeholder="Enter note"
 					/>
 				</div>
 				<div className="mb-4">

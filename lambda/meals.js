@@ -7,6 +7,7 @@ const {
   DeleteItemCommand,
 } = require('@aws-sdk/client-dynamodb');
 const { unmarshall } = require('@aws-sdk/util-dynamodb');
+const { notEqual } = require('assert');
 const { randomUUID: generateUUID } = require('crypto');
 
 const ddbClient = new DynamoDBClient({});
@@ -71,6 +72,7 @@ const handler = async (event) => {
           mealName: { S: requestBody.mealName },
           eatingOut: { BOOL: requestBody.eatingOut },
           date: { S: requestBody.date },
+          note: { S: requestBody.note},
         },
       };
 
