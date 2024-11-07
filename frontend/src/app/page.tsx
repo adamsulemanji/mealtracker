@@ -6,6 +6,7 @@ import axios from "axios";
 import { useState, useEffect, useMemo } from "react";
 import { NewMeal } from "@/components/NewMeal";
 import { useToast } from "@/hooks/use-toast";
+import { MealInfo } from "@/components/NewMeal";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -51,14 +52,6 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 import { Bar, BarChart, XAxis, YAxis, Legend, CartesianGrid } from "recharts";
-
-interface MealInfo {
-	mealID: string;
-	mealName: string;
-	mealType: string;
-	eatingOut: boolean;
-	date: Date;
-}
 
 export default function Home() {
 	const [date, setDate] = useState<Date>();
@@ -143,26 +136,14 @@ export default function Home() {
 		return Object.values(allTime);
 	};
 
-	const handleDateChange = (date: Date) => {
-		setDate(date);
-	};
-
 	const deleteAllMeals = async () => {
 		try {
 			await axios.delete(
 				"https://fzyeqnxwpg.execute-api.us-east-1.amazonaws.com/prod/meals"
 			);
 			setMeals([]);
-			toast({
-				title: "Deleted all meals",
-				description: "You have successfully deleted all meals",
-			});
 		} catch (error) {
-			toast({
-				title: "Error",
-				description: "Failed to delete all meals",
-				variant: "destructive",
-			});
+      console.error(error);
 		}
 	};
 
@@ -172,7 +153,16 @@ export default function Home() {
 			const response = await axios.get(
 				"https://fzyeqnxwpg.execute-api.us-east-1.amazonaws.com/prod/meals"
 			);
-			setMeals(response.data);
+			const sortedMeals = response.data.sort((a: MealInfo, b: MealInfo) => {
+				const dateA = new Date(a.date).getTime();
+				const dateB = new Date(b.date).getTime();
+				if (dateA === dateB) {
+					const mealOrder = ["Breakfast", "Lunch", "Dinner"];
+					return mealOrder.indexOf(a.mealType) - mealOrder.indexOf(b.mealType);
+				}
+				return dateA - dateB;
+			});
+			setMeals(sortedMeals);
 		} catch (error) {
 			toast({
 				title: "Error",
@@ -192,38 +182,13 @@ export default function Home() {
 			setMeals((prevMeals) =>
 				prevMeals.filter((meal) => meal.mealID !== mealID)
 			);
-			toast({
-				title: "Success",
-				description: "Meal deleted successfully",
-			});
 		} catch (error) {
-			toast({
-				title: "Error",
-				description: "Failed to delete meal",
-				variant: "destructive",
-			});
+      console.error(error);
 		}
 	};
 
 	useEffect(() => {
 		getAddMeals();
-	}, []);
-
-	useEffect(() => {
-		setMeals((prevMeals) =>
-			[...prevMeals].sort((a, b) => {
-				const dateA = new Date(a.date).getTime();
-				const dateB = new Date(b.date).getTime();
-				if (dateA === dateB) {
-					const mealOrder = ["Breakfast", "Lunch", "Dinner"];
-					return (
-						mealOrder.indexOf(a.mealType) -
-						mealOrder.indexOf(b.mealType)
-					);
-				}
-				return dateA - dateB;
-			})
-		);
 	}, []);
 
 	const chartData = useMemo(() => {
@@ -251,6 +216,19 @@ export default function Home() {
 				return "";
 		}
 	}, [chartView]);
+
+	const handleAddMeal = (newMeal: MealInfo) => {
+		const sortedMeals = [...meals, newMeal].sort((a, b) => {
+			const dateA = new Date(a.date).getTime();
+			const dateB = new Date(b.date).getTime();
+			if (dateA === dateB) {
+				const mealOrder = ["Breakfast", "Lunch", "Dinner"];
+				return mealOrder.indexOf(a.mealType) - mealOrder.indexOf(b.mealType);
+			}
+			return dateA - dateB;
+		});
+		setMeals(sortedMeals);
+	};
 
 	return (
 		<div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
@@ -298,7 +276,7 @@ export default function Home() {
 										<TableCell>
 											<Button
 												onClick={() =>
-													deleteMeal(meal.mealID)
+													deleteMeal(meal.mealID!)
 												}
 												variant="outline"
 												size="sm"
@@ -376,8 +354,8 @@ export default function Home() {
 				</div>
 				<Separator />
 				<div className="flex gap-4 items-center flex-col sm:flex-row">
-					<NewMeal />
-					<AlertDialog>
+					<NewMeal onAddMeal={handleAddMeal} />
+					{/* <AlertDialog>
 						<AlertDialogTrigger asChild>
 							<Button variant="destructive">
 								Delete All Meals
@@ -401,7 +379,7 @@ export default function Home() {
 								</AlertDialogAction>
 							</AlertDialogFooter>
 						</AlertDialogContent>
-					</AlertDialog>
+					</AlertDialog> */}
 				</div>
 			</main>
 

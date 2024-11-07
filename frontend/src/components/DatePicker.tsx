@@ -48,7 +48,6 @@ export function DatePickerDemo({ onDateChange }: DatePickerDemoProps) {
 					onSelect={(selectedDate) =>
 						selectedDate && handleDateSelect(selectedDate)
 					}
-					initialFocus
 				/>
 			</PopoverContent>
 		</Popover>

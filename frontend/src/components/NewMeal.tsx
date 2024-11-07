@@ -6,7 +6,6 @@ import axios from "axios";
 import { DatePickerDemo } from "./DatePicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
 import {
 	Select,
 	SelectContent,
@@ -24,13 +23,19 @@ import {
 } from "@/components/ui/dialog";
 
 export interface MealInfo {
+	mealID?: string;
 	mealName: string;
 	mealType: string;
 	eatingOut: boolean;
 	date: Date;
 }
 
-export function NewMeal() {
+interface NewMealProps {
+	onAddMeal: (meal: MealInfo) => void;
+}
+
+export function NewMeal({ onAddMeal }: NewMealProps) {
+	const [open, setOpen] = React.useState(false);
 	const [meal, setMeal] = React.useState<MealInfo>({
 		mealName: "",
 		mealType: "breakfast",
@@ -42,30 +47,22 @@ export function NewMeal() {
 		setMeal((prevMeal) => ({ ...prevMeal, date: selectedDate }));
 	};
 
-	const { toast } = useToast();
-
-	const handleSubmit = () => {
-		axios
-			.post(
+	const handleSubmit = async () => {
+		try {
+			const response = await axios.post(
 				"https://fzyeqnxwpg.execute-api.us-east-1.amazonaws.com/prod/meals",
 				meal
-			)
-			.then((response) => {
-				console.log(response);
-			})
-			.catch((error) => {
-				toast({
-					variant: "destructive",
-					title: "Uh oh! Something went wrong.",
-					description: "There was a problem with your request.",
-				});
-				console.error(error);
-			});
-    window.location.reload();
+			);
+			onAddMeal(response.data);
+			setOpen(false);
+      window.location.reload();
+		} catch (error) {
+			console.error(error);
+		}
 	};
 
 	return (
-		<Dialog>
+		<Dialog open={open} onOpenChange={setOpen}>
 			<DialogTrigger asChild>
 				<Button variant="outline">Add New Meal</Button>
 			</DialogTrigger>
