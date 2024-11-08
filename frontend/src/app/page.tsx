@@ -7,7 +7,7 @@ import { useState, useEffect, useMemo } from "react";
 import { NewMeal } from "@/components/NewMeal";
 import { useToast } from "@/hooks/use-toast";
 import { MealInfo } from "@/components/NewMeal";
-
+import { ModeToggle } from "@/components/Dark-LightModeToggle";
 import { Button } from "@/components/ui/button";
 import {
 	AlertDialog,
@@ -244,12 +244,12 @@ export default function Home() {
 	};
 
 	return (
-		<div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
+		<div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)] dark:bg-gray-900 dark:text-gray-300">
 			<main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
 				<h1 className="text-3xl sm:text-4xl font-bold text-center sm:text-left">
 					Welcome Nikki to your Meal Tracker!
 				</h1>
-				<Separator />
+				<Separator className="dark:bg-gray-700" />
 
 				{isLoading ? (
 					<div className="text-center">Loading meals...</div>
@@ -262,17 +262,17 @@ export default function Home() {
 						<Table>
 							<TableHeader>
 								<TableRow>
-									<TableHead>Meal Name</TableHead>
-									<TableHead>Meal Type</TableHead>
-									<TableHead>Eating Out</TableHead>
-									<TableHead>Date</TableHead>
-									<TableHead>Note</TableHead>
-									<TableHead>Actions</TableHead>
+									<TableHead className="dark:bg-gray-800 dark:text-gray-300">Meal Name</TableHead>
+									<TableHead className="dark:bg-gray-800 dark:text-gray-300">Meal Type</TableHead>
+									<TableHead className="dark:bg-gray-800 dark:text-gray-300">Eating Out</TableHead>
+									<TableHead className="dark:bg-gray-800 dark:text-gray-300">Date</TableHead>
+									<TableHead className="dark:bg-gray-800 dark:text-gray-300">Note</TableHead>
+									<TableHead className="dark:bg-gray-800 dark:text-gray-300">Actions</TableHead>
 								</TableRow>
 							</TableHeader>
 							<TableBody>
 								{meals.map((meal) => (
-									<TableRow key={meal.mealID}>
+									<TableRow key={meal.mealID} className="dark:bg-gray-800 dark:text-gray-300">
 										<TableCell>{meal.mealName}</TableCell>
 										<TableCell>{meal.mealType}</TableCell>
 										<TableCell>
@@ -297,8 +297,9 @@ export default function Home() {
 												onClick={() =>
 													deleteMeal(meal.mealID!)
 												}
-												variant="outline"
+												variant="default"
 												size="sm"
+												className="dark:bg-gray-700 dark:text-gray-300"
 											>
 												Delete
 											</Button>
@@ -308,10 +309,10 @@ export default function Home() {
 							</TableBody>
 							<TableFooter>
 								<TableRow>
-									<TableCell colSpan={5}>
+									<TableCell colSpan={5} className="dark:bg-gray-800 dark:text-gray-300">
 										Total Eaten Out vs In
 									</TableCell>
-									<TableCell className="text-right">
+									<TableCell className="text-right dark:bg-gray-800 dark:text-gray-300">
 										{meals.filter((meal) => meal.eatingOut)
 											.length +
 											" - " +
@@ -325,7 +326,7 @@ export default function Home() {
 					</div>
 				)}
 
-				<Separator />
+				<Separator className="dark:bg-gray-700" />
 				<br />
 				{meals.length === 0 ? (
 					<div className="text-center text-gray-500">
@@ -376,38 +377,14 @@ export default function Home() {
 						All Time
 					</Button>
 				</div>
-				<Separator />
+				<Separator className="dark:bg-gray-700" />
 				<div className="flex gap-4 items-center flex-col sm:flex-row">
 					<NewMeal onAddMeal={handleAddMeal} />
-					{/* <AlertDialog>
-						<AlertDialogTrigger asChild>
-							<Button variant="destructive">
-								Delete All Meals
-							</Button>
-						</AlertDialogTrigger>
-						<AlertDialogContent>
-							<AlertDialogHeader>
-								<AlertDialogTitle>
-									Are you absolutely sure?
-								</AlertDialogTitle>
-								<AlertDialogDescription>
-									This action cannot be undone. This will
-									permanently delete all your meals from our
-									servers.
-								</AlertDialogDescription>
-							</AlertDialogHeader>
-							<AlertDialogFooter>
-								<AlertDialogCancel>Cancel</AlertDialogCancel>
-								<AlertDialogAction onClick={deleteAllMeals}>
-									Continue
-								</AlertDialogAction>
-							</AlertDialogFooter>
-						</AlertDialogContent>
-					</AlertDialog> */}
+					<ModeToggle />
 				</div>
 			</main>
 
-			<footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
+			<footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center dark:bg-gray-900 dark:text-gray-300">
 				<a
 					className="flex items-center gap-2 hover:underline hover:underline-offset-4"
 					href="https://www.adamsulemanji.com"

@@ -66,14 +66,14 @@ export function NewMeal({ onAddMeal }: NewMealProps) {
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
 			<DialogTrigger asChild>
-				<Button variant="outline">Add New Meal</Button>
+				<Button variant="default">Add New Meal</Button>
 			</DialogTrigger>
 			<DialogContent>
 				<DialogHeader>
 					<DialogTitle>New Meal</DialogTitle>
 				</DialogHeader>
 				<div className="mb-4">
-					<label className="block text-sm font-medium text-gray-700">
+					<label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
 						Meal Name
 					</label>
 					<Input
@@ -88,7 +88,7 @@ export function NewMeal({ onAddMeal }: NewMealProps) {
 					/>
 				</div>
 				<div className="mb-4">
-					<label className="block text-sm font-medium text-gray-700">
+					<label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
 						Meal Type
 					</label>
 					<Select
@@ -111,7 +111,7 @@ export function NewMeal({ onAddMeal }: NewMealProps) {
 					</Select>
 				</div>
 				<div className="mb-4">
-					<label className="block text-sm font-medium text-gray-700">
+					<label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
 						Eating Out
 					</label>
 					<Switch
@@ -125,7 +125,7 @@ export function NewMeal({ onAddMeal }: NewMealProps) {
 					/>
 				</div>
 				<div className="mb-4">
-					<label className="block text-sm font-medium text-gray-700">
+					<label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
 						Note
 					</label>
 					<Input
@@ -140,7 +140,7 @@ export function NewMeal({ onAddMeal }: NewMealProps) {
 					/>
 				</div>
 				<div className="mb-4">
-					<label className="block text-sm font-medium text-gray-700">
+					<label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
 						Date
 					</label>
 					<DatePickerDemo onDateChange={handleDateChange} />
