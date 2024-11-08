@@ -297,10 +297,10 @@ export default function Home() {
 							<TableFooter>
 								<TableRow>
 									<TableCell colSpan={5}>
-										Total Meals Tracked
+										Total Eaten Out vs In
 									</TableCell>
 									<TableCell className="text-right">
-										{meals.length}
+										{meals.filter((meal) => meal.eatingOut).length + " - " + meals.filter((meal) => !meal.eatingOut).length}
 									</TableCell>
 								</TableRow>
 							</TableFooter>
