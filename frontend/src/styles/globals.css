@@ -1,4 +1,4 @@
-:root {
+/* :root {
   --color-bg: #ffffff;
   --color-text: #000000;
 }
@@ -12,10 +12,10 @@ html,
 body {
   background-color: var(--color-bg);
   color: var(--color-text);
-}
+} */
 
 /* Add this to ensure dark mode styles are applied */
-[data-theme='dark'] .dark\:bg-gray-800 {
+/* [data-theme='dark'] .dark\:bg-gray-800 {
   background-color: rgb(31 41 55);
 }
 
@@ -25,7 +25,7 @@ body {
 
 [data-theme='dark'] .dark\:text-gray-300 {
   color: rgb(209 213 219);
-}
+} */
 
 
 @tailwind base;

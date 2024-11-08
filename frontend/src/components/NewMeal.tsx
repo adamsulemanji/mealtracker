@@ -57,7 +57,7 @@ export function NewMeal({ onAddMeal }: NewMealProps) {
 			);
 			onAddMeal(response.data);
 			setOpen(false);
-      		window.location.reload();
+			window.location.reload();
 		} catch (error) {
 			console.error(error);
 		}

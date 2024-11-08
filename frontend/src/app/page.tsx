@@ -262,17 +262,32 @@ export default function Home() {
 						<Table>
 							<TableHeader>
 								<TableRow>
-									<TableHead className="dark:bg-gray-800 dark:text-gray-300">Meal Name</TableHead>
-									<TableHead className="dark:bg-gray-800 dark:text-gray-300">Meal Type</TableHead>
-									<TableHead className="dark:bg-gray-800 dark:text-gray-300">Eating Out</TableHead>
-									<TableHead className="dark:bg-gray-800 dark:text-gray-300">Date</TableHead>
-									<TableHead className="dark:bg-gray-800 dark:text-gray-300">Note</TableHead>
-									<TableHead className="dark:bg-gray-800 dark:text-gray-300">Actions</TableHead>
+									<TableHead className="dark:bg-gray-800 dark:text-gray-300">
+										Meal Name
+									</TableHead>
+									<TableHead className="dark:bg-gray-800 dark:text-gray-300">
+										Meal Type
+									</TableHead>
+									<TableHead className="dark:bg-gray-800 dark:text-gray-300">
+										Eating Out
+									</TableHead>
+									<TableHead className="dark:bg-gray-800 dark:text-gray-300">
+										Date
+									</TableHead>
+									<TableHead className="dark:bg-gray-800 dark:text-gray-300">
+										Note
+									</TableHead>
+									<TableHead className="dark:bg-gray-800 dark:text-gray-300">
+										Actions
+									</TableHead>
 								</TableRow>
 							</TableHeader>
 							<TableBody>
 								{meals.map((meal) => (
-									<TableRow key={meal.mealID} className="dark:bg-gray-800 dark:text-gray-300">
+									<TableRow
+										key={meal.mealID}
+										className="dark:bg-gray-800 dark:text-gray-300"
+									>
 										<TableCell>{meal.mealName}</TableCell>
 										<TableCell>{meal.mealType}</TableCell>
 										<TableCell>
@@ -309,7 +324,10 @@ export default function Home() {
 							</TableBody>
 							<TableFooter>
 								<TableRow>
-									<TableCell colSpan={5} className="dark:bg-gray-800 dark:text-gray-300">
+									<TableCell
+										colSpan={5}
+										className="dark:bg-gray-800 dark:text-gray-300"
+									>
 										Total Eaten Out vs In
 									</TableCell>
 									<TableCell className="text-right dark:bg-gray-800 dark:text-gray-300">
