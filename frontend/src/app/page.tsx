@@ -143,7 +143,7 @@ export default function Home() {
 			);
 			setMeals([]);
 		} catch (error) {
-      console.error(error);
+			console.error(error);
 		}
 	};
 
@@ -153,15 +153,20 @@ export default function Home() {
 			const response = await axios.get(
 				"https://fzyeqnxwpg.execute-api.us-east-1.amazonaws.com/prod/meals"
 			);
-			const sortedMeals = response.data.sort((a: MealInfo, b: MealInfo) => {
-				const dateA = new Date(a.date).getTime();
-				const dateB = new Date(b.date).getTime();
-				if (dateA === dateB) {
-					const mealOrder = ["Breakfast", "Lunch", "Dinner"];
-					return mealOrder.indexOf(a.mealType) - mealOrder.indexOf(b.mealType);
+			const sortedMeals = response.data.sort(
+				(a: MealInfo, b: MealInfo) => {
+					const dateA = new Date(a.date).getTime();
+					const dateB = new Date(b.date).getTime();
+					if (dateA === dateB) {
+						const mealOrder = ["Breakfast", "Lunch", "Dinner"];
+						return (
+							mealOrder.indexOf(a.mealType) -
+							mealOrder.indexOf(b.mealType)
+						);
+					}
+					return dateA - dateB;
 				}
-				return dateA - dateB;
-			});
+			);
 			setMeals(sortedMeals);
 		} catch (error) {
 			toast({
@@ -183,7 +188,7 @@ export default function Home() {
 				prevMeals.filter((meal) => meal.mealID !== mealID)
 			);
 		} catch (error) {
-      console.error(error);
+			console.error(error);
 		}
 	};
 
@@ -223,7 +228,10 @@ export default function Home() {
 			const dateB = new Date(b.date).getTime();
 			if (dateA === dateB) {
 				const mealOrder = ["Breakfast", "Lunch", "Dinner"];
-				return mealOrder.indexOf(a.mealType) - mealOrder.indexOf(b.mealType);
+				return (
+					mealOrder.indexOf(a.mealType) -
+					mealOrder.indexOf(b.mealType)
+				);
 			}
 			return dateA - dateB;
 		});
@@ -233,7 +241,7 @@ export default function Home() {
 	const getShortenedDayOfWeek = (date: Date) => {
 		const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 		return days[date.getDay()];
-	}
+	};
 
 	return (
 		<div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
@@ -277,7 +285,11 @@ export default function Home() {
 												year: "2-digit",
 												month: "2-digit",
 												day: "2-digit",
-											}) + " - " + getShortenedDayOfWeek(new Date(meal.date))}
+											}) +
+												" - " +
+												getShortenedDayOfWeek(
+													new Date(meal.date)
+												)}
 										</TableCell>
 										<TableCell>{meal.note || ""}</TableCell>
 										<TableCell>
@@ -300,7 +312,12 @@ export default function Home() {
 										Total Eaten Out vs In
 									</TableCell>
 									<TableCell className="text-right">
-										{meals.filter((meal) => meal.eatingOut).length + " - " + meals.filter((meal) => !meal.eatingOut).length}
+										{meals.filter((meal) => meal.eatingOut)
+											.length +
+											" - " +
+											meals.filter(
+												(meal) => !meal.eatingOut
+											).length}
 									</TableCell>
 								</TableRow>
 							</TableFooter>
