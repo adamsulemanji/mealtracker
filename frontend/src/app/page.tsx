@@ -364,21 +364,23 @@ export default function Home() {
 								<XAxis dataKey="date" />
 								<YAxis />
 								<ChartTooltip
-									content={<ChartTooltipContent />}
+									content={<ChartTooltipContent labelFormatter={(label) => `# of ${label === 'eatenOut' ? 'Eaten Out Meals' : 'Eaten Meals'}`} />}
 								/>
-								<Legend />
+								<Legend formatter={(value) => `# of ${value === 'eatenOut' ? 'Eaten Out Meals' : 'Eaten In Meals'}`} />
 								<CartesianGrid vertical={false} />
 								<Bar
 									dataKey="eatenOut"
 									stackId="a"
 									fill="#fbcfe8"
 									radius={4}
+									name="Eaten Out"
 								/>
 								<Bar
 									dataKey="notEatenOut"
 									stackId="a"
 									fill="#f9a8d4"
 									radius={4}
+									name="Eaten In"
 								/>
 							</BarChart>
 						</ChartContainer>
