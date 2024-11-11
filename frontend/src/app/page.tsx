@@ -31,6 +31,19 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 
+import { DatePickerDemo } from "@/components/DatePicker";
+
+import { Input } from "@/components/ui/input";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+
+
 import { Separator } from "@/components/ui/separator";
 import {
 	ChartContainer,
@@ -52,6 +65,7 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 import { Bar, BarChart, XAxis, YAxis, Legend, CartesianGrid } from "recharts";
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
 
 export default function Home() {
 	const [date, setDate] = useState<Date>();
@@ -192,6 +206,29 @@ export default function Home() {
 		}
 	};
 
+	const [selectedMeal, setSelectedMeal] = useState<MealInfo | null>(null);
+
+	const handleEditMeal = (meal: MealInfo) => {
+		setSelectedMeal(meal);
+	};
+
+	const handleSaveMeal = async (updatedMeal: MealInfo) => {
+		try {
+			await axios.put(
+				`https://fzyeqnxwpg.execute-api.us-east-1.amazonaws.com/prod/meals/${updatedMeal.mealID}`,
+				updatedMeal
+			);
+			setMeals((prevMeals) =>
+				prevMeals.map((meal) =>
+					meal.mealID === updatedMeal.mealID ? updatedMeal : meal
+				)
+			);
+			setSelectedMeal(null);
+		} catch (error) {
+			console.error(error);
+		}
+	};
+
 	useEffect(() => {
 		getAddMeals();
 	}, []);
@@ -308,16 +345,145 @@ export default function Home() {
 										</TableCell>
 										<TableCell>{meal.note || ""}</TableCell>
 										<TableCell>
-											<Button
-												onClick={() =>
-													deleteMeal(meal.mealID!)
-												}
-												variant="default"
-												size="sm"
-												className="dark:bg-gray-700 dark:text-gray-300"
-											>
-												Delete
-											</Button>
+											<Dialog>
+												<DialogTrigger asChild>
+													<Button
+														onClick={() =>
+															handleEditMeal(meal)
+														}
+														variant="default"
+														size="sm"
+														className="dark:bg-gray-700 dark:text-gray-300"
+													>
+														Edit
+													</Button>
+												</DialogTrigger>
+												<DialogContent>
+													<DialogHeader>
+														<DialogTitle>
+															Edit Meal
+														</DialogTitle>
+														<DialogDescription>
+															Make changes to
+															your meal entry
+															here. Click save
+															when you're done.
+														</DialogDescription>
+													</DialogHeader>
+													<div className="mb-4">
+														<label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+															Meal Name
+														</label>
+														<Input
+															type="text"
+															value={selectedMeal?.mealName}
+															onChange={(e) =>
+																setSelectedMeal({
+																	...selectedMeal!,
+																	mealName: e.target.value,
+																})
+															}
+															className="mt-1 block w-full dark:bg-gray-700 dark:text-gray-300"
+														/>
+
+														<label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+															Meal Type
+														</label>
+														<Select
+															value={selectedMeal?.mealType}
+															onValueChange={(value) =>
+																setSelectedMeal({
+																	...selectedMeal!,
+																	mealType: value,
+																})
+															}
+														>
+															<SelectTrigger>
+																<SelectValue>
+																	{selectedMeal?.mealType ||
+																		"Select meal type"}
+																</SelectValue>
+															</SelectTrigger>
+															<SelectContent>
+																<SelectItem value="Breakfast">
+																	Breakfast
+																</SelectItem>
+																<SelectItem value="Lunch">
+																	Lunch
+																</SelectItem>
+																<SelectItem value="Dinner">
+																	Dinner
+																</SelectItem>
+															</SelectContent>
+														</Select>
+
+														<label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+															Eating Out
+														</label>
+														<Switch
+															checked={selectedMeal?.eatingOut}
+															onCheckedChange={(checked: boolean) =>
+																setSelectedMeal({
+																	...selectedMeal!,
+																	eatingOut: checked,
+																})
+															}
+															className="mt-1 block dark:bg-gray-700 dark:text-gray-300"
+														/>
+
+														<label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+															Note
+														</label>
+														<input
+															type="text"
+															value={selectedMeal?.note}
+															onChange={(e) =>
+																setSelectedMeal({
+																	...selectedMeal!,
+																	note: e.target.value,
+																})
+															}
+															className="mt-1 block w-full dark:bg-gray-700 dark:text-gray-300"
+														/>
+													</div>
+													<DialogFooter>
+														<Button
+															onClick={() =>
+																handleSaveMeal(
+																	selectedMeal!
+																)
+															}
+															variant="default"
+															size="sm"
+															className="dark:bg-gray-700 dark:text-gray-300"
+														>
+															Save
+														</Button>
+														<Button
+															onClick={() =>
+																deleteMeal(
+																	selectedMeal!
+																		.mealID!
+																)
+															}
+															variant="destructive"
+															size="sm"
+															className="dark:bg-gray-700 dark:text-gray-300"
+														>
+															Delete
+														</Button>
+														<DialogClose asChild>
+															<Button
+																variant="default"
+																size="sm"
+																className="dark:bg-gray-700 dark:text-gray-300"
+															>
+																Cancel
+															</Button>
+														</DialogClose>
+													</DialogFooter>
+												</DialogContent>
+											</Dialog>
 										</TableCell>
 									</TableRow>
 								))}
@@ -364,9 +530,19 @@ export default function Home() {
 								<XAxis dataKey="date" />
 								<YAxis />
 								<ChartTooltip
-									content={<ChartTooltipContent labelFormatter={(label) => `# of ${label === 'eatenOut' ? 'Eaten Out Meals' : 'Eaten Meals'}`} />}
+									content={
+										<ChartTooltipContent
+											labelFormatter={(label) =>
+												`# of ${
+													label === "eatenOut"
+														? "Eaten Out Meals"
+														: "Eaten Meals"
+												}`
+											}
+										/>
+									}
 								/>
-								<Legend formatter={(value) => `# of ${value === 'eatenOut' ? 'Eaten Out Meals' : 'Eaten In Meals'}`} />
+								<Legend />
 								<CartesianGrid vertical={false} />
 								<Bar
 									dataKey="eatenOut"
