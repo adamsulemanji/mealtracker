@@ -4,23 +4,10 @@ import Image from "next/image";
 import React from "react";
 import axios from "axios";
 import { useState, useEffect, useMemo } from "react";
-import { NewMeal } from "@/components/NewMeal";
 import { useToast } from "@/hooks/use-toast";
-import { MealInfo } from "@/components/NewMeal";
+import { MealInfo } from "@/interfaces/MealInfo";
 import { ModeToggle } from "@/components/Dark-LightModeToggle";
 import { Button } from "@/components/ui/button";
-import {
-	AlertDialog,
-	AlertDialogAction,
-	AlertDialogCancel,
-	AlertDialogContent,
-	AlertDialogDescription,
-	AlertDialogFooter,
-	AlertDialogHeader,
-	AlertDialogTitle,
-	AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-
 import {
 	Table,
 	TableBody,
@@ -30,27 +17,14 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-
-import { DatePickerDemo } from "@/components/DatePicker";
-
-import { Input } from "@/components/ui/input";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-
-
 import { Separator } from "@/components/ui/separator";
 import {
 	ChartContainer,
 	ChartTooltipContent,
 	ChartTooltip,
 } from "@/components/ui/chart";
-
+import { Bar, BarChart, XAxis, YAxis, Legend, CartesianGrid } from "recharts";
+import  MealForm  from "@/components/MealForm";
 import { type ChartConfig } from "@/components/ui/chart";
 
 const chartConfig = {
@@ -64,8 +38,6 @@ const chartConfig = {
 	},
 } satisfies ChartConfig;
 
-import { Bar, BarChart, XAxis, YAxis, Legend, CartesianGrid } from "recharts";
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
 
 export default function Home() {
 	const [date, setDate] = useState<Date>();
@@ -212,21 +184,13 @@ export default function Home() {
 		setSelectedMeal(meal);
 	};
 
-	const handleSaveMeal = async (updatedMeal: MealInfo) => {
-		try {
-			await axios.put(
-				`https://fzyeqnxwpg.execute-api.us-east-1.amazonaws.com/prod/meals/${updatedMeal.mealID}`,
-				updatedMeal
-			);
-			setMeals((prevMeals) =>
-				prevMeals.map((meal) =>
-					meal.mealID === updatedMeal.mealID ? updatedMeal : meal
-				)
-			);
-			setSelectedMeal(null);
-		} catch (error) {
-			console.error(error);
-		}
+	const handleSaveMeal = (updatedMeal: MealInfo) => {
+		setMeals((prevMeals) =>
+			prevMeals.map((meal) =>
+				meal.mealID === updatedMeal.mealID ? updatedMeal : meal
+			)
+		);
+		setSelectedMeal(null);
 	};
 
 	useEffect(() => {
@@ -281,7 +245,7 @@ export default function Home() {
 	};
 
 	return (
-		<div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)] dark:bg-gray-900 dark:text-gray-300">
+		<div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)">
 			<main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
 				<h1 className="text-3xl sm:text-4xl font-bold text-center sm:text-left">
 					Welcome Nikki to your Meal Tracker!
@@ -345,145 +309,11 @@ export default function Home() {
 										</TableCell>
 										<TableCell>{meal.note || ""}</TableCell>
 										<TableCell>
-											<Dialog>
-												<DialogTrigger asChild>
-													<Button
-														onClick={() =>
-															handleEditMeal(meal)
-														}
-														variant="default"
-														size="sm"
-														className="dark:bg-gray-700 dark:text-gray-300"
-													>
-														Edit
-													</Button>
-												</DialogTrigger>
-												<DialogContent>
-													<DialogHeader>
-														<DialogTitle>
-															Edit Meal
-														</DialogTitle>
-														<DialogDescription>
-															Make changes to
-															your meal entry
-															here. Click save
-															when you're done.
-														</DialogDescription>
-													</DialogHeader>
-													<div className="mb-4">
-														<label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-															Meal Name
-														</label>
-														<Input
-															type="text"
-															value={selectedMeal?.mealName}
-															onChange={(e) =>
-																setSelectedMeal({
-																	...selectedMeal!,
-																	mealName: e.target.value,
-																})
-															}
-															className="mt-1 block w-full dark:bg-gray-700 dark:text-gray-300"
-														/>
-
-														<label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-															Meal Type
-														</label>
-														<Select
-															value={selectedMeal?.mealType}
-															onValueChange={(value) =>
-																setSelectedMeal({
-																	...selectedMeal!,
-																	mealType: value,
-																})
-															}
-														>
-															<SelectTrigger>
-																<SelectValue>
-																	{selectedMeal?.mealType ||
-																		"Select meal type"}
-																</SelectValue>
-															</SelectTrigger>
-															<SelectContent>
-																<SelectItem value="Breakfast">
-																	Breakfast
-																</SelectItem>
-																<SelectItem value="Lunch">
-																	Lunch
-																</SelectItem>
-																<SelectItem value="Dinner">
-																	Dinner
-																</SelectItem>
-															</SelectContent>
-														</Select>
-
-														<label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-															Eating Out
-														</label>
-														<Switch
-															checked={selectedMeal?.eatingOut}
-															onCheckedChange={(checked: boolean) =>
-																setSelectedMeal({
-																	...selectedMeal!,
-																	eatingOut: checked,
-																})
-															}
-															className="mt-1 block dark:bg-gray-700 dark:text-gray-300"
-														/>
-
-														<label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-															Note
-														</label>
-														<input
-															type="text"
-															value={selectedMeal?.note}
-															onChange={(e) =>
-																setSelectedMeal({
-																	...selectedMeal!,
-																	note: e.target.value,
-																})
-															}
-															className="mt-1 block w-full dark:bg-gray-700 dark:text-gray-300"
-														/>
-													</div>
-													<DialogFooter>
-														<Button
-															onClick={() =>
-																handleSaveMeal(
-																	selectedMeal!
-																)
-															}
-															variant="default"
-															size="sm"
-															className="dark:bg-gray-700 dark:text-gray-300"
-														>
-															Save
-														</Button>
-														<Button
-															onClick={() =>
-																deleteMeal(
-																	selectedMeal!
-																		.mealID!
-																)
-															}
-															variant="destructive"
-															size="sm"
-															className="dark:bg-gray-700 dark:text-gray-300"
-														>
-															Delete
-														</Button>
-														<DialogClose asChild>
-															<Button
-																variant="default"
-																size="sm"
-																className="dark:bg-gray-700 dark:text-gray-300"
-															>
-																Cancel
-															</Button>
-														</DialogClose>
-													</DialogFooter>
-												</DialogContent>
-											</Dialog>
+											<MealForm
+												meal={meal}
+												onSave={handleSaveMeal}
+												onDelete={deleteMeal}
+											/>
 										</TableCell>
 									</TableRow>
 								))}
@@ -575,9 +405,10 @@ export default function Home() {
 				</div>
 				<Separator className="dark:bg-gray-700" />
 				<div className="flex gap-4 items-center flex-col sm:flex-row">
-					<NewMeal onAddMeal={handleAddMeal} />
+					<MealForm onSave={handleAddMeal} />
 					<ModeToggle />
 				</div>
+				
 			</main>
 
 			<footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center dark:bg-gray-900 dark:text-gray-300">

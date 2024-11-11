@@ -154,7 +154,13 @@ const handler = async (event) => {
       for (const [key, value] of Object.entries(requestBody)) {
         updateExpressions.push(`#${key} = :${key}`);
         expressionAttributeNames[`#${key}`] = key;
-        expressionAttributeValues[`:${key}`] = { S: value };
+        if (typeof value === 'boolean') {
+          expressionAttributeValues[`:${key}`] = { BOOL: value };
+        } else if (typeof value === 'string') {
+          expressionAttributeValues[`:${key}`] = { S: value };
+        } else {
+          expressionAttributeValues[`:${key}`] = { S: value.toString() };
+        }
       }
 
       const params = {

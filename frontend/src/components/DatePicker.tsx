@@ -15,10 +15,11 @@ import {
 
 interface DatePickerDemoProps {
 	onDateChange?: (date: Date) => void;
+	selectedDate?: Date; // Add selectedDate prop
 }
 
-export function DatePickerDemo({ onDateChange }: DatePickerDemoProps) {
-	const [date, setDate] = React.useState<Date>();
+export function DatePickerDemo({ onDateChange, selectedDate }: DatePickerDemoProps) {
+	const [date, setDate] = React.useState<Date | undefined>(selectedDate); // Initialize with selectedDate
 
 	const handleDateSelect = (selectedDate: Date) => {
 		setDate(selectedDate);

@@ -2,8 +2,8 @@
 
 import * as React from "react";
 import axios from "axios";
-
-import { DatePickerDemo } from "./DatePicker";
+import { MealInfo } from "@/interfaces/MealInfo";
+import { DatePickerDemo } from "@/components/DatePicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -19,45 +19,55 @@ import {
 	DialogContent,
 	DialogHeader,
 	DialogTitle,
+	DialogDescription,
+	DialogFooter,
+	DialogClose,
 	DialogTrigger,
 } from "@/components/ui/dialog";
 
-export interface MealInfo {
-	mealID?: string;
-	mealName: string;
-	mealType: string;
-	eatingOut: boolean;
-	date: Date;
-	note: string;
+interface MealFormProps {
+	meal?: MealInfo;
+	onSave: (meal: MealInfo) => void;
+	onDelete?: (mealID: string) => void;
 }
 
-interface NewMealProps {
-	onAddMeal: (meal: MealInfo) => void;
-}
-
-export function NewMeal({ onAddMeal }: NewMealProps) {
+function MealForm({ meal, onSave, onDelete }: MealFormProps) {
 	const [open, setOpen] = React.useState(false);
-	const [meal, setMeal] = React.useState<MealInfo>({
-		mealName: "",
-		mealType: "breakfast",
-		eatingOut: false,
-		date: new Date(),
-		note: "",
-	});
+	const [mealData, setMealData] = React.useState<MealInfo>(
+		meal || {
+			mealName: "",
+			mealType: "Breakfast",
+			eatingOut: false,
+			date: new Date(),
+			note: "",
+		}
+	);
 
 	const handleDateChange = (selectedDate: Date) => {
-		setMeal((prevMeal) => ({ ...prevMeal, date: selectedDate }));
+		setMealData((prevMeal) => ({ ...prevMeal, date: selectedDate }));
 	};
 
 	const handleSubmit = async () => {
 		try {
-			const response = await axios.post(
-				"https://fzyeqnxwpg.execute-api.us-east-1.amazonaws.com/prod/meals",
-				meal
-			);
-			onAddMeal(response.data);
+			if (meal) {
+				// Update existing meal
+				await axios.put(
+					`https://fzyeqnxwpg.execute-api.us-east-1.amazonaws.com/prod/meals/${mealData.mealID}`,
+					mealData
+				);
+			} else {
+				// Create new meal
+				const response = await axios.post(
+					"https://fzyeqnxwpg.execute-api.us-east-1.amazonaws.com/prod/meals",
+					mealData
+				);
+				setMealData((prevMeal) => ({
+					...prevMeal,
+					mealID: response.data.mealID,
+				}));
+			}
+			onSave(mealData);
 			setOpen(false);
-			window.location.reload();
 		} catch (error) {
 			console.error(error);
 		}
@@ -66,20 +76,27 @@ export function NewMeal({ onAddMeal }: NewMealProps) {
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
 			<DialogTrigger asChild>
-				<Button variant="default">Add New Meal</Button>
+				<Button variant="default">
+					{meal ? "Edit" : "Add New Meal"}
+				</Button>
 			</DialogTrigger>
 			<DialogContent>
 				<DialogHeader>
-					<DialogTitle>New Meal</DialogTitle>
+					<DialogTitle>{meal ? "Edit Meal" : "New Meal"}</DialogTitle>
+					<DialogDescription>
+						{meal
+							? "Make changes to your meal entry here. Click save when you're done."
+							: "Fill in the details of your new meal. Click save when you're done."}
+					</DialogDescription>
 				</DialogHeader>
 				<div className="mb-4">
 					<label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
 						Meal Name
 					</label>
 					<Input
-						value={meal.mealName}
+						value={mealData.mealName}
 						onChange={(e) =>
-							setMeal((prevMeal) => ({
+							setMealData((prevMeal) => ({
 								...prevMeal,
 								mealName: e.target.value,
 							}))
@@ -92,9 +109,9 @@ export function NewMeal({ onAddMeal }: NewMealProps) {
 						Meal Type
 					</label>
 					<Select
-						value={meal.mealType}
+						value={mealData.mealType}
 						onValueChange={(value) =>
-							setMeal((prevMeal) => ({
+							setMealData((prevMeal) => ({
 								...prevMeal,
 								mealType: value,
 							}))
@@ -115,9 +132,9 @@ export function NewMeal({ onAddMeal }: NewMealProps) {
 						Eating Out
 					</label>
 					<Switch
-						checked={meal.eatingOut}
+						checked={mealData.eatingOut}
 						onCheckedChange={(checked) =>
-							setMeal((prevMeal) => ({
+							setMealData((prevMeal) => ({
 								...prevMeal,
 								eatingOut: checked,
 							}))
@@ -129,9 +146,9 @@ export function NewMeal({ onAddMeal }: NewMealProps) {
 						Note
 					</label>
 					<Input
-						value={meal.note}
+						value={mealData.note}
 						onChange={(e) =>
-							setMeal((prevMeal) => ({
+							setMealData((prevMeal) => ({
 								...prevMeal,
 								note: e.target.value,
 							}))
@@ -143,10 +160,43 @@ export function NewMeal({ onAddMeal }: NewMealProps) {
 					<label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
 						Date
 					</label>
-					<DatePickerDemo onDateChange={handleDateChange} />
+					<DatePickerDemo
+						onDateChange={handleDateChange}
+						selectedDate={mealData.date}
+					/>
 				</div>
-				<Button onClick={handleSubmit}>Add Meal</Button>
+				<DialogFooter>
+					<Button
+						onClick={handleSubmit}
+						variant="default"
+						size="sm"
+						className="dark:bg-gray-700 dark:text-gray-300"
+					>
+						Save
+					</Button>
+					{meal && onDelete && (
+						<Button
+							onClick={() => onDelete(mealData.mealID!)}
+							variant="destructive"
+							size="sm"
+							className="dark:bg-gray-700 dark:text-gray-300"
+						>
+							Delete
+						</Button>
+					)}
+					<DialogClose asChild>
+						<Button
+							variant="default"
+							size="sm"
+							className="dark:bg-gray-700 dark:text-gray-300"
+						>
+							Cancel
+						</Button>
+					</DialogClose>
+				</DialogFooter>
 			</DialogContent>
 		</Dialog>
 	);
 }
+
+export default MealForm;
