@@ -177,7 +177,7 @@ function MealForm({ meal, onSave, onDelete }: MealFormProps) {
 					{meal && onDelete && (
 						<Button
 							onClick={() => onDelete(mealData.mealID!)}
-							variant="destructive"
+							variant="secondary"
 							size="sm"
 							className="dark:bg-gray-700 dark:text-gray-300"
 						>

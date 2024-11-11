@@ -15,7 +15,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Nikki's Meal Tracker",
+  title: "Nikki",
   description: "A website to track your meals by Adam",
 };
 
