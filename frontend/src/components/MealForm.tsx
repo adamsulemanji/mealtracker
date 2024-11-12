@@ -50,13 +50,11 @@ function MealForm({ meal, onSave, onDelete }: MealFormProps) {
 	const handleSubmit = async () => {
 		try {
 			if (meal) {
-				// Update existing meal
 				await axios.put(
 					`https://fzyeqnxwpg.execute-api.us-east-1.amazonaws.com/prod/meals/${mealData.mealID}`,
 					mealData
 				);
 			} else {
-				// Create new meal
 				const response = await axios.post(
 					"https://fzyeqnxwpg.execute-api.us-east-1.amazonaws.com/prod/meals",
 					mealData

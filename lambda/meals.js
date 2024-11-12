@@ -152,14 +152,16 @@ const handler = async (event) => {
       const expressionAttributeValues = {};
 
       for (const [key, value] of Object.entries(requestBody)) {
-        updateExpressions.push(`#${key} = :${key}`);
-        expressionAttributeNames[`#${key}`] = key;
-        if (typeof value === 'boolean') {
-          expressionAttributeValues[`:${key}`] = { BOOL: value };
-        } else if (typeof value === 'string') {
-          expressionAttributeValues[`:${key}`] = { S: value };
-        } else {
-          expressionAttributeValues[`:${key}`] = { S: value.toString() };
+        if (key !== 'mealID') {
+          updateExpressions.push(`#${key} = :${key}`);
+          expressionAttributeNames[`#${key}`] = key;
+          if (typeof value === 'boolean') {
+            expressionAttributeValues[`:${key}`] = { BOOL: value };
+          } else if (typeof value === 'string') {
+            expressionAttributeValues[`:${key}`] = { S: value };
+          } else {
+            expressionAttributeValues[`:${key}`] = { S: value.toString() };
+          }
         }
       }
 
