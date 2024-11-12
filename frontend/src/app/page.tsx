@@ -153,7 +153,7 @@ export default function Home() {
 					return dateA - dateB;
 				}
 			);
-			setMeals(sortedMeals);
+			setMeals(sortedMeals.reverse());
 		} catch (error) {
 			toast({
 				title: "Error",
