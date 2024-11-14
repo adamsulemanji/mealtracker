@@ -18,6 +18,7 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
 	ChartContainer,
 	ChartTooltipContent,
@@ -259,7 +260,7 @@ export default function Home() {
 						No meals available
 					</div>
 				) : (
-					<div className="w-full overflow-x-auto">
+					<div className="w-full">
 						<Table>
 							<TableHeader>
 								<TableRow>
@@ -283,41 +284,47 @@ export default function Home() {
 									</TableHead>
 								</TableRow>
 							</TableHeader>
-							<TableBody>
-								{meals.map((meal) => (
-									<TableRow
-										key={meal.mealID}
-										className="dark:bg-gray-800 dark:text-gray-300"
-									>
-										<TableCell>{meal.mealName}</TableCell>
-										<TableCell>{meal.mealType}</TableCell>
-										<TableCell>
-											{meal.eatingOut ? "Yes" : "No"}
-										</TableCell>
-										<TableCell>
-											{new Date(
-												meal.date
-											).toLocaleDateString("en-US", {
-												year: "2-digit",
-												month: "2-digit",
-												day: "2-digit",
-											}) +
-												" - " +
-												getShortenedDayOfWeek(
-													new Date(meal.date)
-												)}
-										</TableCell>
-										<TableCell>{meal.note || ""}</TableCell>
-										<TableCell>
-											<MealForm
-												meal={meal}
-												onSave={handleSaveMeal}
-												onDelete={deleteMeal}
-											/>
-										</TableCell>
-									</TableRow>
-								))}
-							</TableBody>
+						</Table>
+						<ScrollArea className="h-96">
+							<Table>
+								<TableBody>
+									{meals.map((meal) => (
+										<TableRow
+											key={meal.mealID}
+											className="dark:bg-gray-800 dark:text-gray-300"
+										>
+											<TableCell>{meal.mealName}</TableCell>
+											<TableCell>{meal.mealType}</TableCell>
+											<TableCell>
+												{meal.eatingOut ? "Yes" : "No"}
+											</TableCell>
+											<TableCell>
+												{new Date(
+													meal.date
+												).toLocaleDateString("en-US", {
+													year: "2-digit",
+													month: "2-digit",
+													day: "2-digit",
+												}) +
+													" - " +
+													getShortenedDayOfWeek(
+														new Date(meal.date)
+													)}
+											</TableCell>
+											<TableCell>{meal.note || ""}</TableCell>
+											<TableCell>
+												<MealForm
+													meal={meal}
+													onSave={handleSaveMeal}
+													onDelete={deleteMeal}
+												/>
+											</TableCell>
+										</TableRow>
+									))}
+								</TableBody>
+							</Table>
+						</ScrollArea>
+						<Table>
 							<TableFooter>
 								<TableRow>
 									<TableCell
@@ -337,7 +344,7 @@ export default function Home() {
 								</TableRow>
 							</TableFooter>
 						</Table>
-					</div>
+						</div>
 				)}
 
 				<Separator className="dark:bg-gray-700" />
