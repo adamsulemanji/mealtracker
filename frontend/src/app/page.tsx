@@ -1,12 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import React from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
-import { useState, useEffect, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { MealInfo } from "@/interfaces/MealInfo";
-import { ModeToggle } from "@/components/Dark-LightModeToggle";
+// import { ModeToggle } from "@/components/Dark-LightModeToggle";
 import { Button } from "@/components/ui/button";
 import {
 	Table,
@@ -25,7 +24,7 @@ import {
 	ChartTooltip,
 } from "@/components/ui/chart";
 import { Bar, BarChart, XAxis, YAxis, Legend, CartesianGrid } from "recharts";
-import  MealForm  from "@/components/MealForm";
+import MealForm from "@/components/MealForm";
 import { type ChartConfig } from "@/components/ui/chart";
 
 const chartConfig = {
@@ -39,7 +38,6 @@ const chartConfig = {
 	},
 } satisfies ChartConfig;
 
-
 export default function Home() {
 	const [date, setDate] = useState<Date>();
 	const [newMeal, setNewMeal] = useState(false);
@@ -48,6 +46,7 @@ export default function Home() {
 	const { toast } = useToast();
 	type ChartView = "last7Days" | "currentMonth" | "allTime";
 	const [chartView, setChartView] = useState<ChartView>("last7Days");
+	const [selectedMeal, setSelectedMeal] = useState<MealInfo | null>(null);
 
 	const getLast7DaysData = (meals: MealInfo[]) => {
 		const today = new Date();
@@ -177,12 +176,6 @@ export default function Home() {
 		} catch (error) {
 			console.error(error);
 		}
-	};
-
-	const [selectedMeal, setSelectedMeal] = useState<MealInfo | null>(null);
-
-	const handleEditMeal = (meal: MealInfo) => {
-		setSelectedMeal(meal);
 	};
 
 	const handleSaveMeal = (updatedMeal: MealInfo) => {
@@ -344,7 +337,7 @@ export default function Home() {
 								</TableRow>
 							</TableFooter>
 						</Table>
-						</div>
+					</div>
 				)}
 
 				<Separator className="dark:bg-gray-700" />
@@ -413,9 +406,8 @@ export default function Home() {
 				<Separator className="dark:bg-gray-700" />
 				<div className="flex gap-4 items-center flex-col sm:flex-row">
 					<MealForm onSave={handleAddMeal} />
-					<ModeToggle />
+					{/* <ModeToggle /> */}
 				</div>
-				
 			</main>
 
 			<footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center dark:bg-gray-900 dark:text-gray-300">
