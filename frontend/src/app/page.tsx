@@ -44,8 +44,8 @@ export default function Home() {
 	const [meals, setMeals] = useState<MealInfo[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const { toast } = useToast();
-	type ChartView = "last7Days" | "currentMonth" | "allTime";
-	const [chartView, setChartView] = useState<ChartView>("last7Days");
+	type ChartView = "last7Days" | "currentMonth" | "allTimebyMonth" | "allTimebyDay";
+	const [chartView, setChartView] = useState<ChartView>("currentMonth");
 	const [selectedMeal, setSelectedMeal] = useState<MealInfo | null>(null);
 
 	const getLast7DaysData = (meals: MealInfo[]) => {
@@ -99,12 +99,36 @@ export default function Home() {
 		return currentMonth;
 	};
 
-	const getAllTimeData = (meals: MealInfo[]) => {
+	const getAllTimeDataByMonth = (meals: MealInfo[]) => {
 		const allTime = meals.reduce((acc, meal) => {
 			const mealDate = new Date(meal.date);
 			const month = mealDate.toLocaleString("default", { month: "long" });
 			const year = mealDate.getFullYear();
 			const key = `${month} ${year}`;
+
+			if (!acc[key]) {
+				acc[key] = { date: key, eatenOut: 0, notEatenOut: 0 };
+			}
+
+			if (meal.eatingOut) {
+				acc[key].eatenOut += 1;
+			} else {
+				acc[key].notEatenOut += 1;
+			}
+
+			return acc;
+		}, {} as Record<string, { date: string; eatenOut: number; notEatenOut: number }>);
+
+		return Object.values(allTime);
+	};
+
+	const getAllTimeDatabyDay = (meals: MealInfo[]) => {
+		const allTime = meals.reduce((acc, meal) => {
+			const mealDate = new Date(meal.date);
+			const day = mealDate.getDate();
+			const month = mealDate.toLocaleString("default", { month: "short" });
+			const year = mealDate.getFullYear().toString().slice(-2);
+			const key = `${month} ${day} '${year}`;
 
 			if (!acc[key]) {
 				acc[key] = { date: key, eatenOut: 0, notEatenOut: 0 };
@@ -197,8 +221,10 @@ export default function Home() {
 				return getLast7DaysData(meals);
 			case "currentMonth":
 				return getCurrentMonthData(meals);
-			case "allTime":
-				return getAllTimeData(meals);
+			case "allTimebyMonth":
+				return getAllTimeDataByMonth(meals);
+			case "allTimebyDay":
+				return getAllTimeDatabyDay(meals);
 			default:
 				return [];
 		}
@@ -210,8 +236,10 @@ export default function Home() {
 				return "Last 7 Days";
 			case "currentMonth":
 				return "Current Month";
-			case "allTime":
-				return "All Time";
+			case "allTimebyMonth":
+				return "All Time By Month";
+			case "allTimebyDay":
+				return "All Time By Day";
 			default:
 				return "";
 		}
@@ -244,6 +272,7 @@ export default function Home() {
 				<h1 className="text-3xl sm:text-4xl font-bold text-center sm:text-left">
 					Welcome Nikki to your Meal Tracker!
 				</h1>
+				<h6 className="text-center sm:text-sm"> Adam loves you very much </h6>
 				<Separator className="dark:bg-gray-700" />
 
 				{isLoading ? (
@@ -399,8 +428,11 @@ export default function Home() {
 					<Button onClick={() => setChartView("currentMonth")}>
 						Current Month
 					</Button>
-					<Button onClick={() => setChartView("allTime")}>
-						All Time
+					<Button onClick={() => setChartView("allTimebyMonth")}>
+						All Time by Month
+					</Button>
+					<Button onClick={() => setChartView("allTimebyDay")}>
+						All Time by Day
 					</Button>
 				</div>
 				<Separator className="dark:bg-gray-700" />
