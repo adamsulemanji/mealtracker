@@ -275,6 +275,77 @@ export default function Home() {
 				<h6 className="text-center sm:text-sm"> Adam loves you very much </h6>
 				<Separator className="dark:bg-gray-700" />
 
+				<br />
+				{meals.length === 0 ? (
+					<div className="text-center text-gray-500">
+						No meals available
+					</div>
+				) : (
+					<div className="min-h-[200px] w-full">
+						<h2 className="text-2xl font-bold text-center">
+							{chartTitle}
+						</h2>
+						<br />
+						<ChartContainer
+							config={chartConfig}
+							className="min-h-[200px] w-full"
+						>
+							<BarChart data={chartData}>
+								<XAxis dataKey="date" />
+								<YAxis />
+								<ChartTooltip
+									content={
+										<ChartTooltipContent
+											labelFormatter={(label) =>
+												`# of ${
+													label === "eatenOut"
+														? "Eaten Out Meals"
+														: "Eaten Meals"
+												}`
+											}
+										/>
+									}
+								/>
+								<Legend />
+								<CartesianGrid vertical={false} />
+								<Bar
+									dataKey="eatenOut"
+									stackId="a"
+									fill="#fbcfe8"
+									radius={4}
+									name="Eaten Out"
+								/>
+								<Bar
+									dataKey="notEatenOut"
+									stackId="a"
+									fill="#f9a8d4"
+									radius={4}
+									name="Eaten In"
+								/>
+							</BarChart>
+						</ChartContainer>
+					</div>
+				)}
+				<div className="flex gap-4">
+					<Button onClick={() => setChartView("last7Days")}>
+						Last 7 Days
+					</Button>
+					<Button onClick={() => setChartView("currentMonth")}>
+						Current Month
+					</Button>
+					<Button onClick={() => setChartView("allTimebyMonth")}>
+						All Time by Month
+					</Button>
+					<Button onClick={() => setChartView("allTimebyDay")}>
+						All Time by Day
+					</Button>
+				</div>
+				<Separator className="dark:bg-gray-700" />
+				<div className="flex gap-4 items-center flex-col sm:flex-row">
+					<MealForm onSave={handleAddMeal} />
+					{/* <ModeToggle /> */}
+				</div>
+				<Separator className="dark:bg-gray-700" />
 				{isLoading ? (
 					<div className="text-center">Loading meals...</div>
 				) : meals.length === 0 ? (
@@ -368,78 +439,6 @@ export default function Home() {
 						</Table>
 					</div>
 				)}
-
-				<Separator className="dark:bg-gray-700" />
-				<br />
-				{meals.length === 0 ? (
-					<div className="text-center text-gray-500">
-						No meals available
-					</div>
-				) : (
-					<div className="min-h-[200px] w-full">
-						<h2 className="text-2xl font-bold text-center">
-							{chartTitle}
-						</h2>
-						<br />
-						<ChartContainer
-							config={chartConfig}
-							className="min-h-[200px] w-full"
-						>
-							<BarChart data={chartData}>
-								<XAxis dataKey="date" />
-								<YAxis />
-								<ChartTooltip
-									content={
-										<ChartTooltipContent
-											labelFormatter={(label) =>
-												`# of ${
-													label === "eatenOut"
-														? "Eaten Out Meals"
-														: "Eaten Meals"
-												}`
-											}
-										/>
-									}
-								/>
-								<Legend />
-								<CartesianGrid vertical={false} />
-								<Bar
-									dataKey="eatenOut"
-									stackId="a"
-									fill="#fbcfe8"
-									radius={4}
-									name="Eaten Out"
-								/>
-								<Bar
-									dataKey="notEatenOut"
-									stackId="a"
-									fill="#f9a8d4"
-									radius={4}
-									name="Eaten In"
-								/>
-							</BarChart>
-						</ChartContainer>
-					</div>
-				)}
-				<div className="flex gap-4">
-					<Button onClick={() => setChartView("last7Days")}>
-						Last 7 Days
-					</Button>
-					<Button onClick={() => setChartView("currentMonth")}>
-						Current Month
-					</Button>
-					<Button onClick={() => setChartView("allTimebyMonth")}>
-						All Time by Month
-					</Button>
-					<Button onClick={() => setChartView("allTimebyDay")}>
-						All Time by Day
-					</Button>
-				</div>
-				<Separator className="dark:bg-gray-700" />
-				<div className="flex gap-4 items-center flex-col sm:flex-row">
-					<MealForm onSave={handleAddMeal} />
-					{/* <ModeToggle /> */}
-				</div>
 			</main>
 
 			<footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center dark:bg-gray-900 dark:text-gray-300">
