@@ -281,49 +281,136 @@ export default function Home() {
 						No meals available
 					</div>
 				) : (
-					<div className="min-h-[200px] w-full">
-						<h2 className="text-2xl font-bold text-center">
-							{chartTitle}
-						</h2>
-						<br />
-						<ChartContainer
-							config={chartConfig}
-							className="min-h-[200px] w-full"
-						>
-							<BarChart data={chartData}>
-								<XAxis dataKey="date" />
-								<YAxis />
-								<ChartTooltip
-									content={
-										<ChartTooltipContent
-											labelFormatter={(label) =>
-												`# of ${
-													label === "eatenOut"
-														? "Eaten Out Meals"
-														: "Eaten Meals"
-												}`
-											}
-										/>
-									}
-								/>
-								<Legend />
-								<CartesianGrid vertical={false} />
-								<Bar
-									dataKey="eatenOut"
-									stackId="a"
-									fill="#fbcfe8"
-									radius={4}
-									name="Eaten Out"
-								/>
-								<Bar
-									dataKey="notEatenOut"
-									stackId="a"
-									fill="#f9a8d4"
-									radius={4}
-									name="Eaten In"
-								/>
-							</BarChart>
-						</ChartContainer>
+					<div className="flex flex-col sm:flex-row gap-8 w-full">
+						<div className="min-h-[200px] w-full sm:w-1/2">
+							<h2 className="text-2xl font-bold text-center">
+								{chartTitle}
+							</h2>
+							<br />
+							<ChartContainer
+								config={chartConfig}
+								className="min-h-[200px] w-full"
+							>
+								<BarChart data={chartData}>
+									<XAxis dataKey="date" />
+									<YAxis />
+									<ChartTooltip
+										content={
+											<ChartTooltipContent
+												labelFormatter={(label) =>
+													`# of ${
+														label === "eatenOut"
+															? "Eaten Out Meals"
+															: "Eaten Meals"
+													}`
+												}
+											/>
+										}
+									/>
+									<Legend />
+									<CartesianGrid vertical={false} />
+									<Bar
+										dataKey="eatenOut"
+										stackId="a"
+										fill="#fbcfe8"
+										radius={4}
+										name="Eaten Out"
+									/>
+									<Bar
+										dataKey="notEatenOut"
+										stackId="a"
+										fill="#f9a8d4"
+										radius={4}
+										name="Eaten In"
+									/>
+								</BarChart>
+							</ChartContainer>
+						</div>
+						<div className="w-full sm:w-1/2">
+							<Table>
+								<TableHeader>
+									<TableRow>
+										<TableHead className="dark:bg-gray-800 dark:text-gray-300">
+											Meal Name
+										</TableHead>
+										<TableHead className="dark:bg-gray-800 dark:text-gray-300">
+											Meal Type
+										</TableHead>
+										<TableHead className="dark:bg-gray-800 dark:text-gray-300">
+											Eating Out
+										</TableHead>
+										<TableHead className="dark:bg-gray-800 dark:text-gray-300">
+											Date
+										</TableHead>
+										<TableHead className="dark:bg-gray-800 dark:text-gray-300">
+											Note
+										</TableHead>
+										<TableHead className="dark:bg-gray-800 dark:text-gray-300">
+											Actions
+										</TableHead>
+									</TableRow>
+								</TableHeader>
+							</Table>
+							<ScrollArea className="h-96">
+								<Table>
+									<TableBody>
+										{meals.map((meal) => (
+											<TableRow
+												key={meal.mealID}
+												className="dark:bg-gray-800 dark:text-gray-300"
+											>
+												<TableCell>{meal.mealName}</TableCell>
+												<TableCell>{meal.mealType}</TableCell>
+												<TableCell>
+													{meal.eatingOut ? "Yes" : "No"}
+												</TableCell>
+												<TableCell>
+													{new Date(
+														meal.date
+													).toLocaleDateString("en-US", {
+														year: "2-digit",
+														month: "2-digit",
+														day: "2-digit",
+													}) +
+														" - " +
+														getShortenedDayOfWeek(
+															new Date(meal.date)
+														)}
+												</TableCell>
+												<TableCell>{meal.note || ""}</TableCell>
+												<TableCell>
+													<MealForm
+														meal={meal}
+														onSave={handleSaveMeal}
+														onDelete={deleteMeal}
+													/>
+												</TableCell>
+											</TableRow>
+										))}
+									</TableBody>
+								</Table>
+							</ScrollArea>
+							<Table>
+								<TableFooter>
+									<TableRow>
+										<TableCell
+											colSpan={5}
+											className="dark:bg-gray-800 dark:text-gray-300"
+										>
+											Total Eaten Out vs In
+										</TableCell>
+										<TableCell className="text-right dark:bg-gray-800 dark:text-gray-300">
+											{meals.filter((meal) => meal.eatingOut)
+												.length +
+												" - " +
+												meals.filter(
+													(meal) => !meal.eatingOut
+												).length}
+										</TableCell>
+									</TableRow>
+								</TableFooter>
+							</Table>
+						</div>
 					</div>
 				)}
 				<div className="flex gap-4">
@@ -345,100 +432,6 @@ export default function Home() {
 					<MealForm onSave={handleAddMeal} />
 					{/* <ModeToggle /> */}
 				</div>
-				<Separator className="dark:bg-gray-700" />
-				{isLoading ? (
-					<div className="text-center">Loading meals...</div>
-				) : meals.length === 0 ? (
-					<div className="text-center text-gray-500">
-						No meals available
-					</div>
-				) : (
-					<div className="w-full">
-						<Table>
-							<TableHeader>
-								<TableRow>
-									<TableHead className="dark:bg-gray-800 dark:text-gray-300">
-										Meal Name
-									</TableHead>
-									<TableHead className="dark:bg-gray-800 dark:text-gray-300">
-										Meal Type
-									</TableHead>
-									<TableHead className="dark:bg-gray-800 dark:text-gray-300">
-										Eating Out
-									</TableHead>
-									<TableHead className="dark:bg-gray-800 dark:text-gray-300">
-										Date
-									</TableHead>
-									<TableHead className="dark:bg-gray-800 dark:text-gray-300">
-										Note
-									</TableHead>
-									<TableHead className="dark:bg-gray-800 dark:text-gray-300">
-										Actions
-									</TableHead>
-								</TableRow>
-							</TableHeader>
-						</Table>
-						<ScrollArea className="h-96">
-							<Table>
-								<TableBody>
-									{meals.map((meal) => (
-										<TableRow
-											key={meal.mealID}
-											className="dark:bg-gray-800 dark:text-gray-300"
-										>
-											<TableCell>{meal.mealName}</TableCell>
-											<TableCell>{meal.mealType}</TableCell>
-											<TableCell>
-												{meal.eatingOut ? "Yes" : "No"}
-											</TableCell>
-											<TableCell>
-												{new Date(
-													meal.date
-												).toLocaleDateString("en-US", {
-													year: "2-digit",
-													month: "2-digit",
-													day: "2-digit",
-												}) +
-													" - " +
-													getShortenedDayOfWeek(
-														new Date(meal.date)
-													)}
-											</TableCell>
-											<TableCell>{meal.note || ""}</TableCell>
-											<TableCell>
-												<MealForm
-													meal={meal}
-													onSave={handleSaveMeal}
-													onDelete={deleteMeal}
-												/>
-											</TableCell>
-										</TableRow>
-									))}
-								</TableBody>
-							</Table>
-						</ScrollArea>
-						<Table>
-							<TableFooter>
-								<TableRow>
-									<TableCell
-										colSpan={5}
-										className="dark:bg-gray-800 dark:text-gray-300"
-									>
-										Total Eaten Out vs In
-									</TableCell>
-									<TableCell className="text-right dark:bg-gray-800 dark:text-gray-300">
-										{meals.filter((meal) => meal.eatingOut)
-											.length +
-											" - " +
-											meals.filter(
-												(meal) => !meal.eatingOut
-											).length}
-									</TableCell>
-								</TableRow>
-							</TableFooter>
-						</Table>
-					</div>
-				)}
 			</main>
 
 			<footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center dark:bg-gray-900 dark:text-gray-300">
