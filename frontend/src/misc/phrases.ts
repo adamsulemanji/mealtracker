@@ -1,0 +1,16 @@
+export const phrases: string[] = [
+    "Adam loves you very much",
+    "I hope you are having an amazing day",
+    "So cute",
+    "You are so funny",
+    "Thank you for being the best",
+    "I love you",
+    "Keep being you",
+    "Did you eat and drink water today",
+    "You are the best",
+    "You are so beautiful",
+    "How did you become so amazing",
+    "I am proud of you",
+    "If you see this, text Adam",
+    "STUDDDYYYYYYYYYYYYY",
+];

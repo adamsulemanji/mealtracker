@@ -26,6 +26,7 @@ import {
 import { Bar, BarChart, XAxis, YAxis, Legend, CartesianGrid } from "recharts";
 import MealForm from "@/components/MealForm";
 import { type ChartConfig } from "@/components/ui/chart";
+import { phrases } from "@/misc/phrases";
 
 const chartConfig = {
 	desktop: {
@@ -47,6 +48,7 @@ export default function Home() {
 	type ChartView = "last7Days" | "currentMonth" | "allTimebyMonth" | "allTimebyDay";
 	const [chartView, setChartView] = useState<ChartView>("currentMonth");
 	const [selectedMeal, setSelectedMeal] = useState<MealInfo | null>(null);
+	const [phrase, setPhrase]	= useState<string>("");
 
 	const getLast7DaysData = (meals: MealInfo[]) => {
 		const today = new Date();
@@ -213,6 +215,7 @@ export default function Home() {
 
 	useEffect(() => {
 		getAddMeals();
+		getRandomPhrase();
 	}, []);
 
 	const chartData = useMemo(() => {
@@ -266,13 +269,18 @@ export default function Home() {
 		return days[date.getDay()];
 	};
 
+	const getRandomPhrase = () => {
+		const randomIndex = Math.floor(Math.random() * phrases.length);
+		setPhrase(phrases[randomIndex]);
+	};
+
 	return (
 		<div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)">
 			<main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
 				<h1 className="text-3xl sm:text-4xl font-bold text-center sm:text-left">
 					Welcome Nikki to your Meal Tracker!
 				</h1>
-				<h6 className="text-center sm:text-sm"> Adam loves you very much </h6>
+				<h6 className="text-center sm:text-sm"> {phrase} </h6>
 				<Separator className="dark:bg-gray-700" />
 
 				<br />
