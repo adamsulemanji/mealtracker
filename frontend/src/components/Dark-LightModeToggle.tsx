@@ -14,6 +14,19 @@ import {
 
 export function ModeToggle() {
   const { theme, setTheme } = useTheme();
+  const [isOpen, setIsOpen] = React.useState(false);
+  const [darkMode, setDarkMode] = React.useState(() => {
+    const hour = new Date().getHours();
+    return hour >= 18 || hour < 6; // Dark mode if time is between 6 PM and 6 AM
+  });
+
+  React.useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [darkMode]);
 
   return (
     <DropdownMenu>
@@ -25,14 +38,11 @@ export function ModeToggle() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setTheme("light")}>
+        <DropdownMenuItem onClick={() => setDarkMode(false)}>
           Light
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")}>
+        <DropdownMenuItem onClick={() => setDarkMode(true)}>
           Dark
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("system")}>
-          System
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

@@ -5,7 +5,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import { useToast } from "@/hooks/use-toast";
 import { MealInfo } from "@/interfaces/MealInfo";
-// import { ModeToggle } from "@/components/Dark-LightModeToggle";
+import { ModeToggle } from "@/components/Dark-LightModeToggle";
 import { Button } from "@/components/ui/button";
 import {
 	Table,
@@ -338,22 +338,22 @@ export default function Home() {
 							<Table>
 								<TableHeader>
 									<TableRow>
-										<TableHead className="dark:bg-gray-800 dark:text-gray-300">
+										<TableHead >
 											Meal Name
 										</TableHead>
-										<TableHead className="dark:bg-gray-800 dark:text-gray-300">
+										<TableHead>
 											Meal Type
 										</TableHead>
-										<TableHead className="dark:bg-gray-800 dark:text-gray-300">
+										<TableHead>
 											Eating Out
 										</TableHead>
-										<TableHead className="dark:bg-gray-800 dark:text-gray-300">
+										<TableHead >
 											Date
 										</TableHead>
-										<TableHead className="dark:bg-gray-800 dark:text-gray-300">
+										<TableHead>
 											Note
 										</TableHead>
-										<TableHead className="dark:bg-gray-800 dark:text-gray-300">
+										<TableHead>
 											Actions
 										</TableHead>
 									</TableRow>
@@ -365,7 +365,6 @@ export default function Home() {
 										{meals.map((meal) => (
 											<TableRow
 												key={meal.mealID}
-												className="dark:bg-gray-800 dark:text-gray-300"
 											>
 												<TableCell>{meal.mealName}</TableCell>
 												<TableCell>{meal.mealType}</TableCell>
@@ -403,11 +402,10 @@ export default function Home() {
 									<TableRow>
 										<TableCell
 											colSpan={5}
-											className="dark:bg-gray-800 dark:text-gray-300"
 										>
 											Total Eaten Out vs In
 										</TableCell>
-										<TableCell className="text-right dark:bg-gray-800 dark:text-gray-300">
+										<TableCell>
 											{meals.filter((meal) => meal.eatingOut)
 												.length +
 												" - " +
@@ -438,7 +436,7 @@ export default function Home() {
 				<Separator className="dark:bg-gray-700" />
 				<div className="flex gap-4 items-center flex-col sm:flex-row">
 					<MealForm onSave={handleAddMeal} />
-					{/* <ModeToggle /> */}
+					{ <ModeToggle />}
 				</div>
 			</main>
 

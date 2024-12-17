@@ -65,6 +65,13 @@ function MealForm({ meal, onSave, onDelete }: MealFormProps) {
 				}));
 			}
 			onSave(mealData);
+			setMealData({
+				mealName: "",
+				mealType: "Breakfast",
+				eatingOut: false,
+				date: new Date(),
+				note: "",
+			});
 			setOpen(false);
 		} catch (error) {
 			console.error(error);
@@ -88,7 +95,7 @@ function MealForm({ meal, onSave, onDelete }: MealFormProps) {
 					</DialogDescription>
 				</DialogHeader>
 				<div className="mb-4">
-					<label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+					<label className="block text-sm font-medium">
 						Meal Name
 					</label>
 					<Input
@@ -103,7 +110,7 @@ function MealForm({ meal, onSave, onDelete }: MealFormProps) {
 					/>
 				</div>
 				<div className="mb-4">
-					<label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+					<label className="block text-sm font-medium">
 						Meal Type
 					</label>
 					<Select
@@ -126,7 +133,7 @@ function MealForm({ meal, onSave, onDelete }: MealFormProps) {
 					</Select>
 				</div>
 				<div className="mb-4">
-					<label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+					<label className="block text-sm font-medium">
 						Eating Out
 					</label>
 					<Switch
@@ -140,7 +147,7 @@ function MealForm({ meal, onSave, onDelete }: MealFormProps) {
 					/>
 				</div>
 				<div className="mb-4">
-					<label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+					<label className="block text-sm font-medium">
 						Note
 					</label>
 					<Input
@@ -155,7 +162,7 @@ function MealForm({ meal, onSave, onDelete }: MealFormProps) {
 					/>
 				</div>
 				<div className="mb-4">
-					<label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+					<label className="block text-sm font-medium">
 						Date
 					</label>
 					<DatePickerDemo
@@ -168,7 +175,7 @@ function MealForm({ meal, onSave, onDelete }: MealFormProps) {
 						onClick={handleSubmit}
 						variant="default"
 						size="sm"
-						className="dark:bg-gray-700 dark:text-gray-300"
+						
 					>
 						Save
 					</Button>
@@ -177,7 +184,7 @@ function MealForm({ meal, onSave, onDelete }: MealFormProps) {
 							onClick={() => onDelete(mealData.mealID!)}
 							variant="secondary"
 							size="sm"
-							className="dark:bg-gray-700 dark:text-gray-300"
+							
 						>
 							Delete
 						</Button>
@@ -186,7 +193,6 @@ function MealForm({ meal, onSave, onDelete }: MealFormProps) {
 						<Button
 							variant="default"
 							size="sm"
-							className="dark:bg-gray-700 dark:text-gray-300"
 						>
 							Cancel
 						</Button>
