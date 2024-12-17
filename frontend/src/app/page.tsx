@@ -234,11 +234,16 @@ export default function Home() {
 	}, [meals, chartView]);
 
 	const chartTitle = useMemo(() => {
+		const CurrentMonth = new Date().toLocaleString("default", {
+			month: "long",
+		});
+
+
 		switch (chartView) {
 			case "last7Days":
 				return "Last 7 Days";
 			case "currentMonth":
-				return "Current Month";
+				return "Current Month - " + CurrentMonth;
 			case "allTimebyMonth":
 				return "All Time By Month";
 			case "allTimebyDay":
