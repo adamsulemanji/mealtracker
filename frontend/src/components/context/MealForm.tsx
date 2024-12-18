@@ -3,7 +3,7 @@
 import * as React from "react";
 import axios from "axios";
 import { MealInfo } from "@/interfaces/MealInfo";
-import { DatePickerDemo } from "@/components/DatePicker";
+import { DatePickerDemo } from "@/components/context/DatePicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {

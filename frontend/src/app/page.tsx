@@ -5,7 +5,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import { useToast } from "@/hooks/use-toast";
 import { MealInfo } from "@/interfaces/MealInfo";
-import { ModeToggle } from "@/components/Dark-LightModeToggle";
+import { ModeToggle } from "@/components/provider/Dark-LightModeToggle";
 import { Button } from "@/components/ui/button";
 import {
 	Table,
@@ -24,7 +24,7 @@ import {
 	ChartTooltip,
 } from "@/components/ui/chart";
 import { Bar, BarChart, XAxis, YAxis, Legend, CartesianGrid } from "recharts";
-import MealForm from "@/components/MealForm";
+import MealForm from "@/components/context/MealForm";
 import { type ChartConfig } from "@/components/ui/chart";
 import { phrases } from "@/misc/phrases";
 
