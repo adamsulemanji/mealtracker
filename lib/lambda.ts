@@ -1,10 +1,12 @@
 import { Construct } from 'constructs';
+import * as cdk from 'aws-cdk-lib';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as path from 'path';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 
 export class LambdaConstruct extends Construct {
-  public readonly meals: lambda.Function;
+  public readonly meals_prod: lambda.Function;
+  public readonly meals_dev: lambda.Function
 
   constructor(
     scope: Construct,
@@ -17,13 +19,34 @@ export class LambdaConstruct extends Construct {
     const mealsTableName = dynamos[0].tableName;
 
     // ********** Lambda for Meals **********
-    this.meals = new lambda.Function(this, 'MealsLambda', {
-      runtime: lambda.Runtime.NODEJS_20_X,
-      handler: 'meals.handler',
-      code: lambda.Code.fromAsset(path.join(__dirname, '../lambda')),
-      environment: {
-        USERS_TABLE_NAME: mealsTableName,
-      },
-    });
+    this.meals_prod = new lambda.DockerImageFunction(
+			this,
+			"MealFunction-prod",
+			{
+				code: lambda.DockerImageCode.fromImageAsset(
+					path.join(__dirname, "../api")
+				),
+				memorySize: 512,
+				timeout: cdk.Duration.seconds(30),
+				environment: {
+					TABLE_NAME: dynamos[0].tableName,
+				},
+			}
+		);
+
+    this.meals_dev = new lambda.DockerImageFunction(
+      this,
+      "MealFunction-dev",
+      {
+        code: lambda.DockerImageCode.fromImageAsset(
+          path.join(__dirname, "../api")
+        ),
+        memorySize: 512,
+        timeout: cdk.Duration.seconds(30),
+        environment: {
+          TABLE_NAME: dynamos[1].tableName,
+        },
+      }
+    );
   }
 }

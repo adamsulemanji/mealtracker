@@ -13,18 +13,18 @@ export class MealtrackerStack extends cdk.Stack {
     const ddb = new DynamoDBConstruct(this, 'DynamoDBConstruct');
 
     // ********** Lambda **********
-    const lambda = new LambdaConstruct(this, 'LambdaConstruct', [ddb.mealsTable]);
+    const lambda = new LambdaConstruct(this, 'LambdaConstruct', [ddb.mealsTable_prod, ddb.mealsTable_dev]);
 
     // ********** API Gateway **********
-    new ApiGatewayConstruct(this, 'ApiGatewayConstruct', lambda.meals);
+    const api = new ApiGatewayConstruct(this, 'ApiGatewayConstruct', [lambda.meals_prod, lambda.meals_dev]);
 
     // ********** Frontend **********
-    new FrontendConstruct(this, 'FrontendConstruct');
+    new FrontendConstruct(this, 'FrontendConstruct', [api.api_prod, api.api_dev]);
 
     // ********** Grant Permissions **********
 
-    ddb.mealsTable.grantFullAccess(lambda.meals);
-    lambda.meals
+    ddb.mealsTable_prod.grantReadWriteData(lambda.meals_prod);
+    ddb.mealsTable_dev.grantReadWriteData(lambda.meals_dev);
 
 
   }
