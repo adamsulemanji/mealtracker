@@ -70,23 +70,17 @@ function MealForm({ meal, onSave, onDelete }: MealFormProps) {
   };
 
   const handleSubmit = async () => {
-
-	console.log(mealData);
-	console.log(meal);
-
     try {
       if (meal && meal.mealID) {
         // Edit an existing meal
         await axios.put(`${apiURL}/meals/${meal.mealID}`, mealData);
+        onSave(mealData);
       } else {
         // Create a new meal
         const response = await axios.post(`${apiURL}/meals`, mealData);
-        setMealData((prev) => ({
-          ...prev,
-          mealID: response.data.mealID,
-        }));
+        const newMealData = { ...mealData, mealID: response.data.item.mealID };
+        onSave(newMealData);
       }
-      onSave(mealData);
 
       // Reset the form after saving
       setMealData(defaultMealData);

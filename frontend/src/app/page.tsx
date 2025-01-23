@@ -338,61 +338,60 @@ export default function Home() {
 
             {/* TABLE COLUMN */}
             <div className="w-full sm:w-1/2">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Meal Name</TableHead>
-                    <TableHead>Meal Type</TableHead>
-                    <TableHead>Eating Out</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Note</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-              </Table>
-              <ScrollArea className="h-96">
-                <Table>
-                  <TableBody>
-                    {meals.map((meal) => (
-                      <TableRow key={meal.mealID}>
-                        <TableCell>{meal.mealName}</TableCell>
-                        <TableCell>{meal.mealType}</TableCell>
-                        <TableCell>{meal.eatingOut ? "Yes" : "No"}</TableCell>
-                        <TableCell>
-                          {new Date(meal.date).toLocaleDateString("en-US", {
-                            year: "2-digit",
-                            month: "2-digit",
-                            day: "2-digit",
-                          }) +
-                            " - " +
-                            getShortenedDayOfWeek(new Date(meal.date))}
-                        </TableCell>
-                        <TableCell>{meal.note || ""}</TableCell>
-                        <TableCell>
-                          <MealForm
-                            meal={meal}
-                            onSave={handleSaveMeal}
-                            onDelete={deleteMeal}
-                          />
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </ScrollArea>
+  {/* Wrap the entire table in ScrollArea if you want the header/footer locked */}
+  <ScrollArea className="h-96">
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Meal Name</TableHead>
+          <TableHead>Meal Type</TableHead>
+          <TableHead>Eating Out</TableHead>
+          <TableHead>Date</TableHead>
+          <TableHead className="min-w-[250px]">Note</TableHead>
+          <TableHead>Actions</TableHead>
+        </TableRow>
+      </TableHeader>
 
-              <Table>
-                <TableFooter>
-                  <TableRow>
-                    <TableCell colSpan={5}>Total Eaten Out vs In</TableCell>
-                    <TableCell>
-                      {meals.filter((m) => m.eatingOut).length} -{" "}
-                      {meals.filter((m) => !m.eatingOut).length}
-                    </TableCell>
-                  </TableRow>
-                </TableFooter>
-              </Table>
-            </div>
+      <TableBody>
+        {meals.map((meal) => (
+          <TableRow key={meal.mealID}>
+            <TableCell>{meal.mealName}</TableCell>
+            <TableCell>{meal.mealType}</TableCell>
+            <TableCell>{meal.eatingOut ? "Yes" : "No"}</TableCell>
+            <TableCell>
+              {new Date(meal.date).toLocaleDateString("en-US", {
+                year: "2-digit",
+                month: "2-digit",
+                day: "2-digit",
+              }) +
+                " - " +
+                getShortenedDayOfWeek(new Date(meal.date))}
+            </TableCell>
+            <TableCell>{meal.note || ""}</TableCell>
+            <TableCell>
+              <MealForm
+                meal={meal}
+                onSave={handleSaveMeal}
+                onDelete={deleteMeal}
+              />
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+
+      <TableFooter>
+        <TableRow>
+          <TableCell colSpan={5}>Total Eaten Out vs In</TableCell>
+          <TableCell className="text-right">
+            {meals.filter((m) => m.eatingOut).length} -{" "}
+            {meals.filter((m) => !m.eatingOut).length}
+          </TableCell>
+        </TableRow>
+      </TableFooter>
+    </Table>
+  </ScrollArea>
+</div>
+
           </div>
         )}
 
