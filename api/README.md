@@ -12,7 +12,7 @@ Pass the development table name as an environment variable at runtime:
 ```sh
 docker run \
   -p 8000:8000 \
-  -e TABLE_NAME="MyTable-dev" \
+  -e TABLE_NAME="MealsTable-dev" \
   -v ~/.aws:/root/.aws:ro \
   -e AWS_PROFILE=default \
   -e AWS_DEFAULT_REGION=us-east-1 \

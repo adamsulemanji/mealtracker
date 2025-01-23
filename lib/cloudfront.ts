@@ -121,50 +121,53 @@ export class FrontendConstruct extends Construct {
 
 
 
-		// ********** APIGateway Production **********
-		const certificate_api = new acm.Certificate(
-			this,
-			"CustomDomainCertificate",
-			{
-				domainName: "api.meals.adamsulemanji.com",
-				validation: acm.CertificateValidation.fromDns(zone),
-			}
-		);
+        // ********** APIGateway Production **********
+        const apiSubDomain = "api.meals";
+        const apiDomainName = `${apiSubDomain}.${domainName}`;
 
-		const domainName_api = new apigateway.DomainName(this, "CustomDomain", {
-			domainName: "api.fast.adamsulemanji.com",
-			certificate: certificate_api,
-			endpointType: apigateway.EndpointType.EDGE,
-			securityPolicy: apigateway.SecurityPolicy.TLS_1_2,
-		});
+        const certificate_api = new acm.Certificate(
+            this,
+            "CustomDomainCertificate",
+            {
+                domainName: apiDomainName,
+                validation: acm.CertificateValidation.fromDns(zone),
+            }
+        );
 
-		new apigateway.BasePathMapping(this, "BasePathMapping", {
-			domainName: domainName_api,
-			restApi: apis[0],
-			basePath: "",
-		});
+        const domainName_api = new apigateway.DomainName(this, "CustomDomain", {
+            domainName: apiDomainName,
+            certificate: certificate_api,
+            endpointType: apigateway.EndpointType.EDGE,
+            securityPolicy: apigateway.SecurityPolicy.TLS_1_2,
+        });
 
-		new route53.ARecord(this, "CustomDomainAliasRecord", {
-			zone: zone,
-			recordName: "api.meals",
-			target: route53.RecordTarget.fromAlias(
-				new route53targets.ApiGatewayDomain(domainName_api)
-			),
-		});
+        new apigateway.BasePathMapping(this, "BasePathMapping", {
+            domainName: domainName_api,
+            restApi: apis[0],
+            basePath: "",
+        });
 
-		new cdk.CfnOutput(this, "MealsAPIDomain", {
-			value: `https://api.meals.${domainName}`,
-			description: "Custom Domain URL for the Meals API service",
-		});
+        new route53.ARecord(this, "CustomDomainAliasRecord", {
+            zone: zone,
+            recordName: apiSubDomain,
+            target: route53.RecordTarget.fromAlias(
+                new route53targets.ApiGatewayDomain(domainName_api)
+            ),
+        });
 
-		new cdk.CfnOutput(this, "ApiUrlProd", {
-			value: apis[0].url,
-			description: "Default Invoke URL for the FastAPI service",
-		});
+        new cdk.CfnOutput(this, "MealsAPIDomain", {
+            value: `https://${apiDomainName}`,
+            description: "Custom Domain URL for the Meals API service",
+        });
 
-		new cdk.CfnOutput(this, "ApiUrlDev", {
-			value: apis[1].url,
-			description: "Default Invoke URL for the FastAPI service",
-		});
+        new cdk.CfnOutput(this, "ApiUrlProd", {
+            value: apis[0].url,
+            description: "Default Invoke URL for the FastAPI service",
+        });
+
+        new cdk.CfnOutput(this, "ApiUrlDev", {
+            value: apis[1].url,
+            description: "Default Invoke URL for the FastAPI service",
+        });
 	}
 }

@@ -12,7 +12,7 @@ export class DynamoDBConstruct extends Construct {
     // ******* Meals Table *******
     this.mealsTable_prod = new dynamodb.Table(this, 'MealsTable-prod', {
       partitionKey: { name: 'mealID', type: dynamodb.AttributeType.STRING },
-      tableName: 'MealsTable',
+      tableName: 'MealsTable_prod',
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
