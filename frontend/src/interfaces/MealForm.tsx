@@ -1,4 +1,4 @@
-export interface MealInfo {
+export interface MealForm {
 	mealID?: string;
 	mealName: string;
 	mealType: 'Breakfast' | 'Lunch' | 'Dinner';

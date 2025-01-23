@@ -2,7 +2,8 @@
 
 import * as React from "react";
 import axios from "axios";
-import { MealInfo } from "@/interfaces/MealInfo";
+import { MealForm } from "@/interfaces/MealForm";
+import { MealFormProps } from "@/interfaces/MealFormProps";
 import { DatePickerDemo } from "@/components/context/DatePicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,24 +26,9 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-interface MealFormProps {
-  /**
-   * An existing meal to edit. If `undefined`, the form will create a new meal.
-   */
-  meal?: MealInfo;
 
-  /**
-   * Called when the user successfully creates or updates a meal.
-   */
-  onSave: (meal: MealInfo) => void;
 
-  /**
-   * Called when the user deletes a meal (only shown in edit mode).
-   */
-  onDelete?: (mealID: string) => void;
-}
-
-const defaultMealData: MealInfo = {
+const defaultMealData: MealForm = {
   mealName: "",
   mealType: "Breakfast",
   eatingOut: false,
@@ -50,9 +36,9 @@ const defaultMealData: MealInfo = {
   note: "",
 };
 
-function MealForm({ meal, onSave, onDelete }: MealFormProps) {
+function MealFormModal({ meal, onSave, onDelete }: MealFormProps) {
   const [open, setOpen] = React.useState(false);
-  const [mealData, setMealData] = React.useState<MealInfo>(
+  const [mealData, setMealData] = React.useState<MealForm>(
     meal ?? defaultMealData
   );
 
@@ -209,4 +195,4 @@ function MealForm({ meal, onSave, onDelete }: MealFormProps) {
   );
 }
 
-export default MealForm;
+export default MealFormModal;
