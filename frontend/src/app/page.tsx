@@ -357,7 +357,7 @@ export default function Home() {
 						<div className="w-full sm:w-1/2">
 							<ScrollArea className="h-96">
 								<Table>
-									<TableHeader className="sticky top-0 bg-white dark:bg-gray-800 z-10">
+									<TableHeader className="sticky top-0 z-10">
 										<TableRow>
 											<TableHead>Meal Name</TableHead>
 											<TableHead>Meal Type</TableHead>
@@ -414,7 +414,7 @@ export default function Home() {
 										))}
 									</TableBody>
 
-									<TableFooter className="sticky bottom-0 bg-white dark:bg-gray-800 z-10">
+									<TableFooter className="sticky bottom-0 z-10">
 										<TableRow>
 											<TableCell colSpan={5}>
 												Total Eaten Out vs In
