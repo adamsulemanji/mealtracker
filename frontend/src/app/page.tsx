@@ -355,10 +355,9 @@ export default function Home() {
 
 						{/* TABLE COLUMN */}
 						<div className="w-full sm:w-1/2">
-							{/* Wrap the entire table in ScrollArea if you want the header/footer locked */}
 							<ScrollArea className="h-96">
 								<Table>
-									<TableHeader>
+									<TableHeader className="sticky top-0 bg-white dark:bg-gray-800 z-10">
 										<TableRow>
 											<TableHead>Meal Name</TableHead>
 											<TableHead>Meal Type</TableHead>
@@ -415,7 +414,7 @@ export default function Home() {
 										))}
 									</TableBody>
 
-									<TableFooter>
+									<TableFooter className="sticky bottom-0 bg-white dark:bg-gray-800 z-10">
 										<TableRow>
 											<TableCell colSpan={5}>
 												Total Eaten Out vs In
