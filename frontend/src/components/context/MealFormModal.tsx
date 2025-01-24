@@ -26,8 +26,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-
-
 const defaultMealData: MealForm = {
   mealName: "",
   mealType: "Breakfast",
@@ -89,10 +87,10 @@ function MealFormModal({ meal, onSave, onDelete }: MealFormProps) {
         <Button variant="default">{meal ? "Edit" : "Add New Meal"}</Button>
       </DialogTrigger>
 
-      <DialogContent>
+      <DialogContent className="w-full max-w-lg mx-auto p-4 sm:p-6 md:p-6">
         <DialogHeader>
-          <DialogTitle>{meal ? "Edit Meal" : "New Meal"}</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-lg sm:text-xl">{meal ? "Edit Meal" : "New Meal"}</DialogTitle>
+          <DialogDescription className="text-sm sm:text-base">
             {meal
               ? "Make changes to your meal entry here. Click save when you're done."
               : "Fill in the details of your new meal. Click save when you're done."}
@@ -122,6 +120,7 @@ function MealFormModal({ meal, onSave, onDelete }: MealFormProps) {
                 mealType: value as "Breakfast" | "Lunch" | "Dinner",
               }))
             }
+            
           >
             <SelectTrigger>
               <SelectValue placeholder="Select meal type" />
@@ -154,6 +153,7 @@ function MealFormModal({ meal, onSave, onDelete }: MealFormProps) {
               setMealData((prev) => ({ ...prev, note: e.target.value }))
             }
             placeholder="Enter note"
+            className="w-full"
           />
         </div>
 
@@ -163,12 +163,13 @@ function MealFormModal({ meal, onSave, onDelete }: MealFormProps) {
           <DatePickerDemo
             onDateChange={handleDateChange}
             selectedDate={mealData.date}
+            
           />
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-4">
           {/* Save button */}
-          <Button onClick={handleSubmit} variant="default" size="sm">
+          <Button onClick={handleSubmit} variant="default" size="sm" className="w-full sm:w-auto">
             Save
           </Button>
 
@@ -178,14 +179,14 @@ function MealFormModal({ meal, onSave, onDelete }: MealFormProps) {
               onClick={handleDelete}
               variant="secondary"
               size="sm"
-              className="ml-2"
+              className="w-full sm:w-auto"
             >
               Delete
             </Button>
           )}
 
           <DialogClose asChild>
-            <Button variant="default" size="sm">
+            <Button variant="default" size="sm" className="w-full sm:w-auto">
               Cancel
             </Button>
           </DialogClose>

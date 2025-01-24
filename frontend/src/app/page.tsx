@@ -289,12 +289,13 @@ export default function Home() {
 	// --------------
 
 	return (
-		<div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)">
-			<main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-				<h1 className="text-3xl sm:text-4xl font-bold text-center sm:text-left">
+		<div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-4 sm:p-8 pb-20 gap-8 sm:gap-16 w-full">
+			<main className="flex flex-col gap-4 sm:gap-8 row-start-2 items-center sm:items-start w-full max-w-7xl pr-2">
+				<h1 className="text-2xl sm:text-3xl font-bold text-center sm:text-left">
 					Welcome Nikki to your Meal Tracker!
 				</h1>
 				<h6 className="text-center sm:text-sm">{phrase}</h6>
+
 				<Separator className="dark:bg-gray-700" />
 
 				{isLoading ? (
@@ -306,10 +307,10 @@ export default function Home() {
 						No meals available
 					</div>
 				) : (
-					<div className="flex flex-col sm:flex-row gap-8 w-full">
+					<div className="flex flex-col sm:flex-row gap-4 sm:gap-8 w-full">
 						{/* CHART COLUMN */}
-						<div className="min-h-[200px] w-full sm:w-1/2">
-							<h2 className="text-2xl font-bold text-center">
+						<div className="min-h-[200px] w-full sm:w-3/4 md:w-1/2 mx-auto px-4">
+							<h2 className="text-xl sm:text-2xl font-bold text-center">
 								{chartTitle}
 							</h2>
 							<br />
@@ -317,7 +318,13 @@ export default function Home() {
 								config={chartConfig}
 								className="min-h-[200px] w-full"
 							>
-								<BarChart data={chartData}>
+								<BarChart
+									data={chartData}
+									width={0}
+									height={
+										0
+									} /* width/height ignored with responsive container */
+								>
 									<XAxis dataKey="date" />
 									<YAxis />
 									<ChartTooltip
@@ -354,16 +361,23 @@ export default function Home() {
 						</div>
 
 						{/* TABLE COLUMN */}
-						<div className="w-full sm:w-1/2">
-							<ScrollArea className="h-96">
-								<Table>
-									<TableHeader className="sticky top-0 z-10">
+						<div className="w-full sm:w-1/2 sm:mr-2">
+							<ScrollArea className="h-64 sm:h-96 w-full">
+								<Table className="w-full">
+									<TableHeader className="sticky top-0 dark:bg-gray-700 bg-gray-50">
 										<TableRow>
 											<TableHead>Meal Name</TableHead>
-											<TableHead>Meal Type</TableHead>
-											<TableHead>Eating Out</TableHead>
-											<TableHead>Date</TableHead>
-											<TableHead className="min-w-[250px]">
+											<TableHead className="min-w-[100px] md:min-w-[50px]">
+												Meal Type
+											</TableHead>
+											<TableHead className="hidden md:table-cell min-w-[75px]">
+												Eating Out
+											</TableHead>
+											<TableHead className="min-w-[125px] md:min-w-[75px]">
+												Date
+											</TableHead>
+											{/* Hide note column on smaller screens */}
+											<TableHead className="hidden md:table-cell min-w-[150px]">
 												Note
 											</TableHead>
 											<TableHead>Actions</TableHead>
@@ -379,7 +393,7 @@ export default function Home() {
 												<TableCell>
 													{meal.mealType}
 												</TableCell>
-												<TableCell>
+												<TableCell className="hidden md:table-cell">
 													{meal.eatingOut
 														? "Yes"
 														: "No"}
@@ -400,7 +414,8 @@ export default function Home() {
 															new Date(meal.date)
 														)}
 												</TableCell>
-												<TableCell>
+												{/* Hide note column on smaller screens */}
+												<TableCell className="hidden md:table-cell">
 													{meal.note || ""}
 												</TableCell>
 												<TableCell>
@@ -414,11 +429,17 @@ export default function Home() {
 										))}
 									</TableBody>
 
-									<TableFooter className="sticky bottom-0 z-10">
+									<TableFooter className="sticky bottom-0 z-10 dark:bg-gray-700 bg-gray-50">
 										<TableRow>
-											<TableCell colSpan={5}>
+											{/* Make sure colSpan matches the visible columns on smaller screens */}
+											<TableCell
+												colSpan={3}
+												className="font-semibold"
+											>
 												Total Eaten Out vs In
 											</TableCell>
+											<TableCell className="hidden md:table-cell" />
+											<TableCell className="hidden md:table-cell" />
 											<TableCell className="text-right">
 												{
 													meals.filter(
@@ -440,30 +461,42 @@ export default function Home() {
 					</div>
 				)}
 
-				<div className="flex gap-4 mt-4">
-					<Button onClick={() => setChartView("last7Days")}>
+				<div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mt-4 flex-wrap justify-center sm:justify-start w-full">
+					<Button
+						className="w-full sm:w-auto"
+						onClick={() => setChartView("last7Days")}
+					>
 						Last 7 Days
 					</Button>
-					<Button onClick={() => setChartView("currentMonth")}>
+					<Button
+						className="w-full sm:w-auto"
+						onClick={() => setChartView("currentMonth")}
+					>
 						Current Month
 					</Button>
-					<Button onClick={() => setChartView("allTimebyMonth")}>
+					<Button
+						className="w-full sm:w-auto"
+						onClick={() => setChartView("allTimebyMonth")}
+					>
 						All Time by Month
 					</Button>
-					<Button onClick={() => setChartView("allTimebyDay")}>
+					<Button
+						className="w-full sm:w-auto"
+						onClick={() => setChartView("allTimebyDay")}
+					>
 						All Time by Day
 					</Button>
 				</div>
 				<Separator className="dark:bg-gray-700" />
 
-				<div className="flex gap-4 items-center flex-col sm:flex-row">
+				<div className="flex gap-2 sm:gap-4 items-center flex-col sm:flex-row">
 					{/* Button to add a new meal (MealForm without meal prop) */}
 					<MealFormModal onSave={handleSaveMeal} />
 					<ModeToggle />
 				</div>
 			</main>
 
-			<footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center dark:bg-gray-900 dark:text-gray-300">
+			<footer className="row-start-3 flex gap-4 sm:gap-6 flex-wrap items-center justify-center  w-full">
 				<a
 					className="flex items-center gap-2 hover:underline hover:underline-offset-4"
 					href="https://www.adamsulemanji.com"
