@@ -135,7 +135,7 @@ export default function Home() {
 			return acc;
 		}, {} as Record<string, { date: string; eatenOut: number; notEatenOut: number }>);
 
-		return Object.values(mapObj);
+		return Object.values(mapObj).reverse();
 	};
 
 	const getAllTimeDatabyDay = (meals: MealForm[]) => {
