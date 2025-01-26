@@ -290,7 +290,7 @@ export default function Home() {
 
 	return (
 		<div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-4 sm:p-8 pb-20 gap-8 sm:gap-16 w-full">
-			<main className="flex flex-col gap-4 sm:gap-8 row-start-2 items-center sm:items-start w-full max-w-7xl pr-2">
+			<main className="flex flex-col gap-4 sm:gap-8 row-start-2 items-center sm:items-start w-full max-w-7xl px-2">
 				<h1 className="text-2xl sm:text-3xl font-bold text-center sm:text-left">
 					Welcome Nikki to your Meal Tracker!
 				</h1>
