@@ -13,4 +13,8 @@ export const phrases: string[] = [
     "I am proud of you",
     "If you see this, text Adam",
     "STUDDDYYYYYYYYYYYYY",
+    "wyd",
+    "Make sure to drink water",
+    "You are so smart",
+    "Have fun today",
 ];
