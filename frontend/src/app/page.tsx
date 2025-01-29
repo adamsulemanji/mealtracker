@@ -54,7 +54,6 @@ export default function Home() {
 
 	const apiURL = process.env.NEXT_PUBLIC_API_URL;
 
-	/** Helper: Sort meals by date, and then by meal type (Breakfast -> Lunch -> Dinner). */
 	function sortMeals(meals: MealForm[]): MealForm[] {
 		const mealOrder = ["Breakfast", "Lunch", "Dinner"];
 		return [...meals].sort((a, b) => {
@@ -139,27 +138,50 @@ export default function Home() {
 	};
 
 	const getAllTimeDatabyDay = (meals: MealForm[]) => {
-		const mapObj = meals.reduce((acc, meal) => {
-			const mealDate = new Date(meal.date);
-			const day = mealDate.getDate();
-			const month = mealDate.toLocaleString("default", {
-				month: "short",
-			});
-			const year = mealDate.getFullYear().toString().slice(-2);
-			const key = `${month} ${day} '${year}`;
+		if (meals.length === 0) return [];
+	  
+		const minDate = meals.reduce((earliest, meal) => {
+		  const mealTime = new Date(meal.date).getTime();
+		  return mealTime < earliest.getTime() ? new Date(meal.date) : earliest;
+		}, new Date(meals[0].date));
+	  
+		const now = new Date();
+	  
+		const dailyDataArray: { date: string; eatenOut: number; notEatenOut: number }[] = [];
+		const dateKeyToIndex: Record<string, number> = {};
+	  
+		const pointer = new Date(minDate);
+	  
+		let index = 0;
+		while (pointer <= now) {
+		  const key = formatKey(pointer);
+		  
 
-			if (!acc[key]) {
-				acc[key] = { date: key, eatenOut: 0, notEatenOut: 0 };
-			}
+		  dailyDataArray.push({ date: key, eatenOut: 0, notEatenOut: 0 });
+		  dateKeyToIndex[key] = index++;
+	  
+		  pointer.setDate(pointer.getDate() + 1);
+		}
+	  
+		meals.forEach(meal => {
+		  const key = formatKey(new Date(meal.date));
+		  if (key in dateKeyToIndex) {
+			const i = dateKeyToIndex[key];
 			if (meal.eatingOut) {
-				acc[key].eatenOut += 1;
+			  dailyDataArray[i].eatenOut += 1;
 			} else {
-				acc[key].notEatenOut += 1;
+			  dailyDataArray[i].notEatenOut += 1;
 			}
-			return acc;
-		}, {} as Record<string, { date: string; eatenOut: number; notEatenOut: number }>);
+		  }
+		});
+	  
+		return dailyDataArray;
+	  };
 
-		return Object.values(mapObj);
+	const formatKey = (date: Date) => {
+		const day = date.getDate();
+		const month = date.toLocaleString("default", { month: "short" });
+		return `${month} ${day}`;
 	};
 
 	// -------------
@@ -193,7 +215,6 @@ export default function Home() {
 		}
 	}
 
-	// If you need to remove *all* meals
 	async function deleteAllMeals() {
 		try {
 			await axios.delete(`${apiURL}/meals`);
@@ -203,11 +224,8 @@ export default function Home() {
 		}
 	}
 
-	// Called after MealForm finishes creating or updating
 	const handleSaveMeal = (updatedMeal: MealForm) => {
 		setMeals((prevMeals) => {
-			// If it’s a new meal (no mealID found in prevMeals),
-			// or if updating an existing one:
 			const exists = prevMeals.some(
 				(m) => m.mealID === updatedMeal.mealID
 			);
@@ -219,7 +237,6 @@ export default function Home() {
 			} else {
 				newMeals = [...prevMeals, updatedMeal];
 			}
-			// Sort them properly after changes
 			return sortMeals(newMeals).reverse();
 		});
 	};
@@ -318,13 +335,7 @@ export default function Home() {
 								config={chartConfig}
 								className="min-h-[200px] w-full"
 							>
-								<BarChart
-									data={chartData}
-									width={0}
-									height={
-										0
-									} /* width/height ignored with responsive container */
-								>
+								<BarChart data={chartData} width={0} height={0}>
 									<XAxis dataKey="date" />
 									<YAxis />
 									<ChartTooltip
@@ -364,7 +375,7 @@ export default function Home() {
 						<div className="w-full sm:w-1/2 sm:mr-2">
 							<ScrollArea className="h-64 sm:h-96 w-full">
 								<Table className="w-full">
-									<TableHeader className="sticky top-0 dark:bg-gray-700 bg-gray-50">
+									<TableHeader className="sticky top-0 dark:bg-gray-700 bg-gray-200">
 										<TableRow>
 											<TableHead>Meal Name</TableHead>
 											<TableHead className="min-w-[100px] md:min-w-[50px]">
@@ -376,7 +387,6 @@ export default function Home() {
 											<TableHead className="min-w-[125px] md:min-w-[75px]">
 												Date
 											</TableHead>
-											{/* Hide note column on smaller screens */}
 											<TableHead className="hidden md:table-cell min-w-[150px]">
 												Note
 											</TableHead>
@@ -429,9 +439,8 @@ export default function Home() {
 										))}
 									</TableBody>
 
-									<TableFooter className="sticky bottom-0 z-10 dark:bg-gray-700 bg-gray-50">
+									<TableFooter className="sticky bottom-0 z-10 dark:bg-gray-700 bg-gray-200">
 										<TableRow>
-											{/* Make sure colSpan matches the visible columns on smaller screens */}
 											<TableCell
 												colSpan={3}
 												className="font-semibold"
