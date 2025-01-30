@@ -218,6 +218,11 @@ export default function Home() {
 		} catch (error) {
 			console.error("Failed to delete meal:", error);
 		}
+		toast({
+			title: "Meal deleted",
+			description: "Meal deleted successfully",
+			variant: "destructive",
+		});
 	}
 
 	async function deleteAllMeals() {
@@ -227,6 +232,11 @@ export default function Home() {
 		} catch (error) {
 			console.error(error);
 		}
+		toast({
+			title: "Uh oh, you've deleted all your meals!",
+			description: "All meals deleted successfully",
+			variant: "destructive",
+		});
 	}
 
 	const handleSaveMeal = (updatedMeal: MealForm) => {
@@ -243,6 +253,11 @@ export default function Home() {
 				newMeals = [...prevMeals, updatedMeal];
 			}
 			return sortMeals(newMeals).reverse();
+		});
+		toast({
+			title: "Success",
+			description: "Meal saved successfully",
+			variant: "default",
 		});
 	};
 
