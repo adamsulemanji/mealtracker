@@ -139,44 +139,49 @@ export default function Home() {
 
 	const getAllTimeDatabyDay = (meals: MealForm[]) => {
 		if (meals.length === 0) return [];
-	  
+
 		const minDate = meals.reduce((earliest, meal) => {
-		  const mealTime = new Date(meal.date).getTime();
-		  return mealTime < earliest.getTime() ? new Date(meal.date) : earliest;
+			const mealTime = new Date(meal.date).getTime();
+			return mealTime < earliest.getTime()
+				? new Date(meal.date)
+				: earliest;
 		}, new Date(meals[0].date));
-	  
+
 		const now = new Date();
-	  
-		const dailyDataArray: { date: string; eatenOut: number; notEatenOut: number }[] = [];
+
+		const dailyDataArray: {
+			date: string;
+			eatenOut: number;
+			notEatenOut: number;
+		}[] = [];
 		const dateKeyToIndex: Record<string, number> = {};
-	  
+
 		const pointer = new Date(minDate);
-	  
+
 		let index = 0;
 		while (pointer <= now) {
-		  const key = formatKey(pointer);
-		  
+			const key = formatKey(pointer);
 
-		  dailyDataArray.push({ date: key, eatenOut: 0, notEatenOut: 0 });
-		  dateKeyToIndex[key] = index++;
-	  
-		  pointer.setDate(pointer.getDate() + 1);
+			dailyDataArray.push({ date: key, eatenOut: 0, notEatenOut: 0 });
+			dateKeyToIndex[key] = index++;
+
+			pointer.setDate(pointer.getDate() + 1);
 		}
-	  
-		meals.forEach(meal => {
-		  const key = formatKey(new Date(meal.date));
-		  if (key in dateKeyToIndex) {
-			const i = dateKeyToIndex[key];
-			if (meal.eatingOut) {
-			  dailyDataArray[i].eatenOut += 1;
-			} else {
-			  dailyDataArray[i].notEatenOut += 1;
+
+		meals.forEach((meal) => {
+			const key = formatKey(new Date(meal.date));
+			if (key in dateKeyToIndex) {
+				const i = dateKeyToIndex[key];
+				if (meal.eatingOut) {
+					dailyDataArray[i].eatenOut += 1;
+				} else {
+					dailyDataArray[i].notEatenOut += 1;
+				}
 			}
-		  }
 		});
-	  
+
 		return dailyDataArray;
-	  };
+	};
 
 	const formatKey = (date: Date) => {
 		const day = date.getDate();
@@ -499,7 +504,6 @@ export default function Home() {
 				<Separator className="dark:bg-gray-700" />
 
 				<div className="flex gap-2 sm:gap-4 items-center flex-col sm:flex-row">
-					{/* Button to add a new meal (MealForm without meal prop) */}
 					<MealFormModal onSave={handleSaveMeal} />
 					<ModeToggle />
 				</div>
@@ -507,7 +511,7 @@ export default function Home() {
 
 			<footer className="row-start-3 flex gap-4 sm:gap-6 flex-wrap items-center justify-center  w-full">
 				<a
-					className="flex items-center gap-2 hover:underline hover:underline-offset-4"
+					className="flex items-center gap-2"
 					href="https://www.adamsulemanji.com"
 					target="_blank"
 					rel="noopener noreferrer"
@@ -519,7 +523,10 @@ export default function Home() {
 						width={16}
 						height={16}
 					/>
-					Made by Adam Sulemanji
+					<p className="underline-offset-3 group relative inline-block underline underline-offset-1 decoration-gray-200">
+						Made by Adam Sulemanji
+						<span className="absolute bottom-0 left-0 mt-1 block h-[1px] w-0 bg-current transition-all duration-300 group-hover:w-full"></span>
+					</p>
 				</a>
 			</footer>
 		</div>
