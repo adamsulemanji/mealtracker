@@ -328,9 +328,12 @@ export default function Home() {
 	return (
 		<div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-4 sm:p-8 pb-20 gap-8 sm:gap-16 w-full">
 			<main className="flex flex-col gap-4 sm:gap-8 row-start-2 items-center sm:items-start w-full max-w-7xl px-2">
-				<h1 className="text-2xl sm:text-3xl font-bold text-center sm:text-left">
-					Welcome Nikki to your Meal Tracker!
+				<h1 className="text-2xl sm:text-6xl font-bold text-center sm:text-left">
+					Hi Nikki
 				</h1>
+				<h2 className="text-lg sm:text-xl text-center sm:text-left">
+					Welcome to your meal tracker
+				</h2>
 				<h6 className="text-center sm:text-sm">{phrase}</h6>
 
 				<Separator className="dark:bg-gray-700" />
@@ -538,9 +541,9 @@ export default function Home() {
 						width={16}
 						height={16}
 					/>
-					<p className="underline-offset-3 group relative inline-block underline underline-offset-1 decoration-gray-200">
+					<p className="underline-offset-3 group relative inline-block underline underline-offset-2 decoration-gray-200">
 						Made by Adam Sulemanji
-						<span className="absolute bottom-0 left-0 mt-1 block h-[1px] w-0 bg-current transition-all duration-300 group-hover:w-full"></span>
+						<span className="absolute bottom-0 left-0 mt-1 block h-[2px] w-0 bg-current transition-all duration-300 group-hover:w-full"></span>
 					</p>
 				</a>
 			</footer>
