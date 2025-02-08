@@ -14,7 +14,7 @@ export class DynamoDBConstruct extends Construct {
       partitionKey: { name: 'mealID', type: dynamodb.AttributeType.STRING },
       tableName: 'MealsTable_prod',
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      removalPolicy: cdk.RemovalPolicy.RETAIN
     });
 
     this.mealsTable_dev = new dynamodb.Table(this, 'MealsTable-dev', {
