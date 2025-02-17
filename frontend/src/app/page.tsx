@@ -23,7 +23,16 @@ import {
 	ChartTooltipContent,
 	ChartTooltip,
 } from "@/components/ui/chart";
-import { Bar, BarChart, XAxis, YAxis, Legend, CartesianGrid, Line, LineChart } from "recharts";
+import {
+	Bar,
+	BarChart,
+	XAxis,
+	YAxis,
+	Legend,
+	CartesianGrid,
+	Line,
+	LineChart,
+} from "recharts";
 import MealFormModal from "@/components/context/MealFormModal";
 import { type ChartConfig } from "@/components/ui/chart";
 import { phrases } from "@/misc/phrases";
@@ -190,7 +199,6 @@ export default function Home() {
 		return `${month} ${day}`;
 	};
 
-
 	const rollingEatingOutPercentage = (meals: MealForm[]) => {
 		const sortedMeals = [...meals].sort(
 			(a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
@@ -206,7 +214,8 @@ export default function Home() {
 					month: "short",
 					day: "numeric",
 				}),
-				eatenOutPercentage: (cumulativeEatenOut / cumulativeTotal) * 100,
+				eatenOutPercentage:
+					(cumulativeEatenOut / cumulativeTotal) * 100,
 			};
 		});
 
@@ -387,27 +396,41 @@ export default function Home() {
 								className="min-h-[200px] w-full"
 							>
 								{chartView === "rollingEatingOutPercentage" ? (
-									<LineChart data={chartData} width={0} height={0}>
+									<LineChart
+										data={chartData}
+										width={0}
+										height={0}
+									>
 										<XAxis dataKey="date" />
-										<YAxis />
+										<YAxis
+											label={{
+												value: `Percentage`,
+												style: { textAnchor: "middle" },
+												angle: -90,
+												position: "left",
+												offset: 0,
+											}}
+										/>
 										<ChartTooltip
-											content={({ active, payload, label }) => {
-												if (active && payload && payload.length) {
+											content={({
+												active,
+												payload,
+												label,
+											}) => {
+												if (
+													active &&
+													payload &&
+													payload.length
+												) {
 													return (
-														<div
-															style={{
-																backgroundColor: "#ffffff",
-																padding: "8px",
-																border: "1px solid #ccc",
-																borderRadius: "4px",
-															}}
-														>
-															<p style={{ fontWeight: "bold", margin: 0 }}>{label}</p>
-															<p style={{ margin: 0 }}>
+														<div className="p-2 border rounded bg-white dark:bg-[#1B1D17]">
+															<p className="font-bold m-0">{label}</p>
+															<p className="m-0">
 																Eating Out Percentage:{" "}
 																{typeof payload[0]?.value === "number"
 																	? payload[0]?.value.toFixed(2)
-																	: "0"}%
+																	: "0"}
+																%
 															</p>
 														</div>
 													);
@@ -415,25 +438,35 @@ export default function Home() {
 												return null;
 											}}
 										/>
+										
 										<Legend />
 										<CartesianGrid vertical={false} />
 										<Line
 											dataKey="eatenOutPercentage"
 											stroke="#f9a8d4"
 											strokeWidth={2}
-											dot={{ r: 3 }}
+											dot={false}
+											activeDot={{ r: 5 }}
 											name="Eating Out Percentage"
 										/>
 									</LineChart>
 								) : (
-									<BarChart data={chartData} width={0} height={0}>
+									<BarChart
+										data={chartData}
+										width={0}
+										height={0}
+									>
 										<XAxis dataKey="date" />
 										<YAxis />
 										<ChartTooltip
 											content={
 												<ChartTooltipContent
 													labelFormatter={(label) =>
-														`# of ${label === "eatenOut" ? "Eaten Out Meals" : "Eaten Meals"}`
+														`# of ${
+															label === "eatenOut"
+																? "Eaten Out Meals"
+																: "Eaten Meals"
+														}`
 													}
 												/>
 											}
