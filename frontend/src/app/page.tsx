@@ -23,7 +23,7 @@ import {
 	ChartTooltipContent,
 	ChartTooltip,
 } from "@/components/ui/chart";
-import { Bar, BarChart, XAxis, YAxis, Legend, CartesianGrid } from "recharts";
+import { Bar, BarChart, XAxis, YAxis, Legend, CartesianGrid, Line, LineChart } from "recharts";
 import MealFormModal from "@/components/context/MealFormModal";
 import { type ChartConfig } from "@/components/ui/chart";
 import { phrases } from "@/misc/phrases";
@@ -43,7 +43,8 @@ type ChartView =
 	| "last7Days"
 	| "currentMonth"
 	| "allTimebyMonth"
-	| "allTimebyDay";
+	| "allTimebyDay"
+	| "rollingEatingOutPercentage";
 
 export default function Home() {
 	const [meals, setMeals] = useState<MealForm[]>([]);
@@ -189,6 +190,29 @@ export default function Home() {
 		return `${month} ${day}`;
 	};
 
+
+	const rollingEatingOutPercentage = (meals: MealForm[]) => {
+		const sortedMeals = [...meals].sort(
+			(a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+		);
+		let cumulativeTotal = 0;
+		let cumulativeEatenOut = 0;
+
+		const cumulativeData = sortedMeals.map((meal) => {
+			cumulativeTotal += 1;
+			if (meal.eatingOut) cumulativeEatenOut += 1;
+			return {
+				date: new Date(meal.date).toLocaleDateString("en-US", {
+					month: "short",
+					day: "numeric",
+				}),
+				eatenOutPercentage: (cumulativeEatenOut / cumulativeTotal) * 100,
+			};
+		});
+
+		return cumulativeData;
+	};
+
 	// -------------
 	// API Handlers
 	// -------------
@@ -298,6 +322,8 @@ export default function Home() {
 				return getAllTimeDataByMonth(meals);
 			case "allTimebyDay":
 				return getAllTimeDatabyDay(meals);
+			case "rollingEatingOutPercentage":
+				return rollingEatingOutPercentage(meals);
 			default:
 				return [];
 		}
@@ -316,6 +342,8 @@ export default function Home() {
 				return "All Time By Month";
 			case "allTimebyDay":
 				return "All Time By Day";
+			case "rollingEatingOutPercentage":
+				return "Rolling Eating Out Percentage";
 			default:
 				return "";
 		}
@@ -358,39 +386,76 @@ export default function Home() {
 								config={chartConfig}
 								className="min-h-[200px] w-full"
 							>
-								<BarChart data={chartData} width={0} height={0}>
-									<XAxis dataKey="date" />
-									<YAxis />
-									<ChartTooltip
-										content={
-											<ChartTooltipContent
-												labelFormatter={(label) =>
-													`# of ${
-														label === "eatenOut"
-															? "Eaten Out Meals"
-															: "Eaten Meals"
-													}`
+								{chartView === "rollingEatingOutPercentage" ? (
+									<LineChart data={chartData} width={0} height={0}>
+										<XAxis dataKey="date" />
+										<YAxis />
+										<ChartTooltip
+											content={({ active, payload, label }) => {
+												if (active && payload && payload.length) {
+													return (
+														<div
+															style={{
+																backgroundColor: "#ffffff",
+																padding: "8px",
+																border: "1px solid #ccc",
+																borderRadius: "4px",
+															}}
+														>
+															<p style={{ fontWeight: "bold", margin: 0 }}>{label}</p>
+															<p style={{ margin: 0 }}>
+																Eating Out Percentage:{" "}
+																{typeof payload[0]?.value === "number"
+																	? payload[0]?.value.toFixed(2)
+																	: "0"}%
+															</p>
+														</div>
+													);
 												}
-											/>
-										}
-									/>
-									<Legend />
-									<CartesianGrid vertical={false} />
-									<Bar
-										dataKey="eatenOut"
-										stackId="a"
-										fill="#fbcfe8"
-										radius={4}
-										name="Eaten Out"
-									/>
-									<Bar
-										dataKey="notEatenOut"
-										stackId="a"
-										fill="#f9a8d4"
-										radius={4}
-										name="Eaten In"
-									/>
-								</BarChart>
+												return null;
+											}}
+										/>
+										<Legend />
+										<CartesianGrid vertical={false} />
+										<Line
+											dataKey="eatenOutPercentage"
+											stroke="#f9a8d4"
+											strokeWidth={2}
+											dot={{ r: 3 }}
+											name="Eating Out Percentage"
+										/>
+									</LineChart>
+								) : (
+									<BarChart data={chartData} width={0} height={0}>
+										<XAxis dataKey="date" />
+										<YAxis />
+										<ChartTooltip
+											content={
+												<ChartTooltipContent
+													labelFormatter={(label) =>
+														`# of ${label === "eatenOut" ? "Eaten Out Meals" : "Eaten Meals"}`
+													}
+												/>
+											}
+										/>
+										<Legend />
+										<CartesianGrid vertical={false} />
+										<Bar
+											dataKey="eatenOut"
+											stackId="a"
+											fill="#fbcfe8"
+											radius={4}
+											name="Eaten Out"
+										/>
+										<Bar
+											dataKey="notEatenOut"
+											stackId="a"
+											fill="#f9a8d4"
+											radius={4}
+											name="Eaten In"
+										/>
+									</BarChart>
+								)}
 							</ChartContainer>
 						</div>
 
@@ -447,7 +512,6 @@ export default function Home() {
 															new Date(meal.date)
 														)}
 												</TableCell>
-												{/* Hide note column on smaller screens */}
 												<TableCell className="hidden md:table-cell">
 													{meal.note || ""}
 												</TableCell>
@@ -517,6 +581,14 @@ export default function Home() {
 						onClick={() => setChartView("allTimebyDay")}
 					>
 						All Time by Day
+					</Button>
+					<Button
+						className="w-full sm:w-auto"
+						onClick={() =>
+							setChartView("rollingEatingOutPercentage")
+						}
+					>
+						Rolling Eating Out Percentage
 					</Button>
 				</div>
 				<Separator className="dark:bg-gray-700" />
