@@ -36,6 +36,12 @@ import {
 import MealFormModal from "@/components/context/MealFormModal";
 import { type ChartConfig } from "@/components/ui/chart";
 import { phrases } from "@/misc/phrases";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+  } from "@/components/ui/dropdown-menu";
 
 const chartConfig = {
 	desktop: {
@@ -61,6 +67,8 @@ export default function Home() {
 	const { toast } = useToast();
 	const [chartView, setChartView] = useState<ChartView>("currentMonth");
 	const [phrase, setPhrase] = useState<string>("");
+	const [mealTypeFilter, setMealTypeFilter] = useState<string | null>(null);
+	const [eatingOutFilter, setEatingOutFilter] = useState<boolean | null>(null);
 
 	const apiURL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -321,22 +329,33 @@ export default function Home() {
 	// Chart logic
 	// --------------
 
+	const filteredMeals = useMemo(
+		() =>
+			meals.filter((m) => {
+				const passesMealType = mealTypeFilter ? m.mealType === mealTypeFilter : true;
+				const passesEatingOut =
+					eatingOutFilter !== null ? m.eatingOut === eatingOutFilter : true;
+				return passesMealType && passesEatingOut;
+			}),
+		[meals, mealTypeFilter, eatingOutFilter]
+	);
+
 	const chartData = useMemo(() => {
 		switch (chartView) {
 			case "last7Days":
-				return getLast7DaysData(meals);
+				return getLast7DaysData(filteredMeals);
 			case "currentMonth":
-				return getCurrentMonthData(meals);
+				return getCurrentMonthData(filteredMeals);
 			case "allTimebyMonth":
-				return getAllTimeDataByMonth(meals);
+				return getAllTimeDataByMonth(filteredMeals);
 			case "allTimebyDay":
-				return getAllTimeDatabyDay(meals);
+				return getAllTimeDatabyDay(filteredMeals);
 			case "rollingEatingOutPercentage":
-				return rollingEatingOutPercentage(meals);
+				return rollingEatingOutPercentage(filteredMeals);
 			default:
 				return [];
 		}
-	}, [meals, chartView]);
+	}, [filteredMeals, chartView]);
 
 	const chartTitle = useMemo(() => {
 		const CurrentMonth = new Date().toLocaleString("default", {
@@ -516,7 +535,7 @@ export default function Home() {
 									</TableHeader>
 
 									<TableBody>
-										{meals.map((meal) => (
+											{filteredMeals.map((meal) => (
 											<TableRow key={meal.mealID}>
 												<TableCell>
 													{meal.mealName}
@@ -571,13 +590,13 @@ export default function Home() {
 											<TableCell className="hidden md:table-cell" />
 											<TableCell className="text-right">
 												{
-													meals.filter(
+													filteredMeals.filter(
 														(m) => m.eatingOut
 													).length
 												}{" "}
 												-{" "}
 												{
-													meals.filter(
+													filteredMeals.filter(
 														(m) => !m.eatingOut
 													).length
 												}
@@ -628,6 +647,45 @@ export default function Home() {
 
 				<div className="flex gap-2 sm:gap-4 items-center flex-col sm:flex-row">
 					<MealFormModal onSave={handleSaveMeal} />
+					<DropdownMenu>
+						<DropdownMenuTrigger asChild>
+							<Button>
+								Filter Meal by Eating Out/In
+							</Button>
+						</DropdownMenuTrigger>
+						<DropdownMenuContent align="end">
+							<DropdownMenuItem onClick={() => setEatingOutFilter(null)}>
+								All
+							</DropdownMenuItem>
+							<DropdownMenuItem onClick={() => setEatingOutFilter(true)}>
+								Eating Out
+							</DropdownMenuItem>
+							<DropdownMenuItem onClick={() => setEatingOutFilter(false)}>
+								Eating In
+							</DropdownMenuItem>
+						</DropdownMenuContent>
+					</DropdownMenu>
+					<DropdownMenu>
+						<DropdownMenuTrigger asChild>
+							<Button>
+								Filter Meal by Type
+							</Button>
+						</DropdownMenuTrigger>
+						<DropdownMenuContent align="end">
+							<DropdownMenuItem onClick={() => setMealTypeFilter(null)}>
+								All
+							</DropdownMenuItem>
+							<DropdownMenuItem onClick={() => setMealTypeFilter("Breakfast")}>
+								Breakfast
+							</DropdownMenuItem>
+							<DropdownMenuItem onClick={() => setMealTypeFilter("Lunch")}>
+								Lunch
+							</DropdownMenuItem>
+							<DropdownMenuItem onClick={() => setMealTypeFilter("Dinner")}>
+								Dinner
+							</DropdownMenuItem>
+						</DropdownMenuContent>
+					</DropdownMenu>
 					<ModeToggle />
 				</div>
 			</main>
