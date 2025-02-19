@@ -404,7 +404,6 @@ export default function Home() {
 					</div>
 				) : (
 					<div className="flex flex-col sm:flex-row gap-4 sm:gap-8 w-full">
-						{/* CHART COLUMN */}
 						<div className="min-h-[200px] w-full sm:w-3/4 md:w-1/2 mx-auto px-4">
 							<h2 className="text-xl sm:text-2xl font-bold text-center">
 								{chartTitle}
@@ -686,8 +685,17 @@ export default function Home() {
 							</DropdownMenuItem>
 						</DropdownMenuContent>
 					</DropdownMenu>
+					<div>
+						<p>
+							{mealTypeFilter == null ? "" : `Current Meal Type Filter: ${mealTypeFilter}`}
+						</p>
+						<p>
+							{eatingOutFilter === null ? "" : eatingOutFilter ? "Current Eating Out Filter: Eating Out" : "Current Eating Out Filter: Eating In"}
+						</p>
+					</div>
 					<ModeToggle />
 				</div>
+				<Separator className="dark:bg-gray-700" />
 			</main>
 
 			<footer className="row-start-3 flex gap-4 sm:gap-6 flex-wrap items-center justify-center  w-full">
