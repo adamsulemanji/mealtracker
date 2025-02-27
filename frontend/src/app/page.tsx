@@ -42,6 +42,8 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
   } from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
+import { X } from "lucide-react";
 
 const chartConfig = {
 	desktop: {
@@ -685,16 +687,36 @@ export default function Home() {
 							</DropdownMenuItem>
 						</DropdownMenuContent>
 					</DropdownMenu>
-					<div>
-						<p>
-							{mealTypeFilter == null ? "" : `Current Meal Type Filter: ${mealTypeFilter}`}
-						</p>
-						<p>
-							{eatingOutFilter === null ? "" : eatingOutFilter ? "Current Eating Out Filter: Eating Out" : "Current Eating Out Filter: Eating In"}
-						</p>
-					</div>
 					<ModeToggle />
 				</div>
+				
+				{/* Active Filters Display */}
+				{(mealTypeFilter !== null || eatingOutFilter !== null) && (
+					<div className="flex flex-wrap gap-2 items-center mt-2">
+						<span className="text-sm text-muted-foreground mr-1">Active Filters:</span>
+						{mealTypeFilter && (
+							<Badge variant="secondary" className="flex items-center gap-1">
+								Meal: {mealTypeFilter}
+								<X 
+									size={14} 
+									className="cursor-pointer" 
+									onClick={() => setMealTypeFilter(null)} 
+								/>
+							</Badge>
+						)}
+						{eatingOutFilter !== null && (
+							<Badge variant="secondary" className="flex items-center gap-1">
+								{eatingOutFilter ? "Eating Out" : "Eating In"}
+								<X 
+									size={14} 
+									className="cursor-pointer" 
+									onClick={() => setEatingOutFilter(null)} 
+								/>
+							</Badge>
+						)}
+					</div>
+				)}
+				
 				<Separator className="dark:bg-gray-700" />
 			</main>
 
