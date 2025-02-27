@@ -1,28 +1,7 @@
 "use client";
-
 import Image from "next/image";
 import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
-import { useToast } from "@/hooks/use-toast";
-import { MealForm } from "@/interfaces/MealForm";
-import { ModeToggle } from "@/components/provider/Dark-LightModeToggle";
-import { Button } from "@/components/ui/button";
-import {
-	Table,
-	TableBody,
-	TableCell,
-	TableFooter,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from "@/components/ui/table";
-import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-	ChartContainer,
-	ChartTooltipContent,
-	ChartTooltip,
-} from "@/components/ui/chart";
 import {
 	Bar,
 	BarChart,
@@ -32,18 +11,39 @@ import {
 	CartesianGrid,
 	Line,
 	LineChart,
+	ResponsiveContainer,
 } from "recharts";
-import MealFormModal from "@/components/context/MealFormModal";
-import { type ChartConfig } from "@/components/ui/chart";
+import { useToast } from "@/hooks/use-toast";
+import { MealForm } from "@/interfaces/MealForm";
 import { phrases } from "@/misc/phrases";
+import { ModeToggle } from "@/components/provider/Dark-LightModeToggle";
+import MealFormModal from "@/components/context/MealFormModal";
+import {
+	ChartContainer,
+	ChartTooltipContent,
+	ChartTooltip,
+} from "@/components/ui/chart";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
-  } from "@/components/ui/dropdown-menu";
-import { Badge } from "@/components/ui/badge";
-import { X } from "lucide-react";
+} from "@/components/ui/dropdown-menu";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableFooter,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "@/components/ui/table";
+import { X, FilterIcon, ChevronDown } from "lucide-react";
+import { type ChartConfig } from "@/components/ui/chart";
 
 const chartConfig = {
 	desktop: {
@@ -384,191 +384,254 @@ export default function Home() {
 	// --------------
 
 	return (
-		<div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-4 sm:p-8 pb-20 gap-8 sm:gap-16 w-full">
-			<main className="flex flex-col gap-4 sm:gap-8 row-start-2 items-center sm:items-start w-full max-w-7xl px-2">
-				<h1 className="text-2xl sm:text-6xl font-bold text-center sm:text-left">
-					Hi Nikki
-				</h1>
-				<h2 className="text-lg sm:text-xl text-center sm:text-left">
-					Welcome to your meal tracker
-				</h2>
-				<h6 className="text-center sm:text-sm">{phrase}</h6>
+		<div className="flex flex-col min-h-screen p-4 sm:p-6 md:p-8 w-full">
+			<main className="flex flex-col flex-1 gap-4 sm:gap-6 md:gap-8 items-center w-full max-w-7xl mx-auto">
+				{/* Header Section */}
+				<div className="w-full text-center sm:text-left">
+					<h1 className="text-3xl sm:text-4xl md:text-6xl font-bold">
+						Hi Nikki
+					</h1>
+					<h2 className="text-base sm:text-lg md:text-xl mt-2">
+						Welcome to your meal tracker
+					</h2>
+					<p className="text-sm text-muted-foreground mt-2">{phrase}</p>
+				</div>
 
-				<Separator className="dark:bg-gray-700" />
+				<Separator className="dark:bg-gray-700 my-2" />
 
+				{/* Main Content */}
 				{isLoading ? (
-					<div className="text-center text-gray-500">
-						Loading meals...
+					<div className="flex items-center justify-center w-full py-12">
+						<div className="text-center text-gray-500">
+							Loading meals...
+						</div>
 					</div>
 				) : meals.length === 0 ? (
-					<div className="text-center text-gray-500">
-						No meals available
+					<div className="flex items-center justify-center w-full py-12">
+						<div className="text-center text-gray-500">
+							No meals available
+						</div>
 					</div>
 				) : (
-					<div className="flex flex-col sm:flex-row gap-4 sm:gap-8 w-full">
-						<div className="min-h-[200px] w-full sm:w-3/4 md:w-1/2 mx-auto px-4">
-							<h2 className="text-xl sm:text-2xl font-bold text-center">
+					<div className="flex flex-col w-full gap-6 md:gap-8">
+						{/* Chart Section */}
+						<div className="w-full">
+							<h2 className="text-xl sm:text-2xl font-bold text-center mb-4">
 								{chartTitle}
 							</h2>
-							<br />
-							<ChartContainer
-								config={chartConfig}
-								className="min-h-[200px] w-full"
-							>
-								{chartView === "rollingEatingOutPercentage" ? (
-									<LineChart
-										data={chartData}
-										width={0}
-										height={0}
-									>
-										<XAxis dataKey="date" />
-										<YAxis
-											label={{
-												value: `Percentage`,
-												style: { textAnchor: "middle" },
-												angle: -90,
-												position: "left",
-												offset: 0,
-											}}
-										/>
-										<ChartTooltip
-											content={({
-												active,
-												payload,
-												label,
-											}) => {
-												if (
-													active &&
-													payload &&
-													payload.length
-												) {
-													return (
-														<div className="p-2 border rounded bg-white dark:bg-[#1B1D17]">
-															<p className="font-bold m-0">{label}</p>
-															<p className="m-0">
-																Eating Out Percentage:{" "}
-																{typeof payload[0]?.value === "number"
-																	? payload[0]?.value.toFixed(2)
-																	: "0"}
-																%
-															</p>
-														</div>
-													);
-												}
-												return null;
-											}}
-										/>
-										
-										<Legend />
-										<CartesianGrid vertical={false} />
-										<Line
-											dataKey="eatenOutPercentage"
-											stroke="#f9a8d4"
-											strokeWidth={2}
-											dot={false}
-											activeDot={{ r: 5 }}
-											name="Eating Out Percentage"
-										/>
-									</LineChart>
-								) : (
-									<BarChart
-										data={chartData}
-										width={0}
-										height={0}
-									>
-										<XAxis dataKey="date" />
-										<YAxis />
-										<ChartTooltip
-											content={
-												<ChartTooltipContent
-													labelFormatter={(label) =>
-														`# of ${
-															label === "eatenOut"
-																? "Eaten Out Meals"
-																: "Eaten Meals"
-														}`
+							<div className="h-[300px] sm:h-[350px] md:h-[400px] w-full px-2">
+								<ChartContainer
+									config={chartConfig}
+									className="w-full h-full"
+								>
+									<ResponsiveContainer width="100%" height="100%">
+										{chartView === "rollingEatingOutPercentage" ? (
+											<LineChart data={chartData}>
+												<XAxis 
+													dataKey="date" 
+													tick={{ fontSize: 10 }}
+													interval="preserveStartEnd"
+													tickMargin={5}
+												/>
+												<YAxis
+													label={{
+														value: `Percentage`,
+														style: { textAnchor: "middle" },
+														angle: -90,
+														position: "left",
+														offset: 0,
+													}}
+													tick={{ fontSize: 10 }}
+													width={45}
+												/>
+												<ChartTooltip
+													content={({
+														active,
+														payload,
+														label,
+													}) => {
+														if (
+															active &&
+															payload &&
+															payload.length
+														) {
+															return (
+																<div className="p-2 border rounded bg-white dark:bg-[#1B1D17]">
+																	<p className="font-bold m-0">{label}</p>
+																	<p className="m-0">
+																		Eating Out Percentage:{" "}
+																		{typeof payload[0]?.value === "number"
+																			? payload[0]?.value.toFixed(2)
+																			: "0"}
+																		%
+																	</p>
+																</div>
+															);
+														}
+														return null;
+													}}
+												/>
+												
+												<Legend />
+												<CartesianGrid vertical={false} />
+												<Line
+													dataKey="eatenOutPercentage"
+													stroke="#f9a8d4"
+													strokeWidth={2}
+													dot={false}
+													activeDot={{ r: 5 }}
+													name="Eating Out Percentage"
+												/>
+											</LineChart>
+										) : (
+											<BarChart data={chartData}>
+												<XAxis 
+													dataKey="date" 
+													tick={{ fontSize: 10 }}
+													interval="preserveStartEnd"
+													tickMargin={5}
+												/>
+												<YAxis tick={{ fontSize: 10 }} width={30} />
+												<ChartTooltip
+													content={
+														<ChartTooltipContent
+															labelFormatter={(label) =>
+																`# of ${
+																	label === "eatenOut"
+																		? "Eaten Out Meals"
+																		: "Eaten Meals"
+																}`
+															}
+														/>
 													}
 												/>
-											}
-										/>
-										<Legend />
-										<CartesianGrid vertical={false} />
-										<Bar
-											dataKey="eatenOut"
-											stackId="a"
-											fill="#fbcfe8"
-											radius={4}
-											name="Eaten Out"
-										/>
-										<Bar
-											dataKey="notEatenOut"
-											stackId="a"
-											fill="#f9a8d4"
-											radius={4}
-											name="Eaten In"
-										/>
-									</BarChart>
-								)}
-							</ChartContainer>
+												<Legend wrapperStyle={{ fontSize: '12px' }} />
+												<CartesianGrid vertical={false} />
+												<Bar
+													dataKey="eatenOut"
+													stackId="a"
+													fill="#fbcfe8"
+													radius={[4, 4, 0, 0]}
+													name="Eaten Out"
+												/>
+												<Bar
+													dataKey="notEatenOut"
+													stackId="a"
+													fill="#f9a8d4"
+													radius={[4, 4, 0, 0]}
+													name="Eaten In"
+												/>
+											</BarChart>
+										)}
+									</ResponsiveContainer>
+								</ChartContainer>
+							</div>
 						</div>
 
-						{/* TABLE COLUMN */}
-						<div className="w-full sm:w-1/2 sm:mr-2">
-							<ScrollArea className="h-64 sm:h-96 w-full">
+						{/* Chart Buttons */}
+						<div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 w-full">
+							<Button
+								size="sm"
+								variant={chartView === "last7Days" ? "default" : "outline"}
+								className="text-xs sm:text-sm"
+								onClick={() => setChartView("last7Days")}
+							>
+								Last 7 Days
+							</Button>
+							<Button
+								size="sm"
+								variant={chartView === "currentMonth" ? "default" : "outline"}
+								className="text-xs sm:text-sm"
+								onClick={() => setChartView("currentMonth")}
+							>
+								Current Month
+							</Button>
+							<Button
+								size="sm"
+								variant={chartView === "allTimebyMonth" ? "default" : "outline"}
+								className="text-xs sm:text-sm"
+								onClick={() => setChartView("allTimebyMonth")}
+							>
+								All Time by Month
+							</Button>
+							<Button
+								size="sm"
+								variant={chartView === "allTimebyDay" ? "default" : "outline"}
+								className="text-xs sm:text-sm"
+								onClick={() => setChartView("allTimebyDay")}
+							>
+								All Time by Day
+							</Button>
+							<Button
+								size="sm"
+								variant={chartView === "rollingEatingOutPercentage" ? "default" : "outline"}
+								className="text-xs sm:text-sm col-span-2 sm:col-span-1"
+								onClick={() =>
+									setChartView("rollingEatingOutPercentage")
+								}
+							>
+								Rolling %
+							</Button>
+						</div>
+
+						<Separator className="dark:bg-gray-700" />
+
+						{/* Table Section */}
+						<div className="w-full">
+							<h3 className="text-lg font-medium mb-2">Meal History</h3>
+							<ScrollArea className="h-[300px] sm:h-[400px] w-full border rounded-md">
 								<Table className="w-full">
-									<TableHeader className="sticky top-0 dark:bg-gray-700 bg-gray-200">
+									<TableHeader className="sticky top-0 dark:bg-gray-800/90 bg-gray-100/90 backdrop-blur-sm z-10">
 										<TableRow>
-											<TableHead>Meal Name</TableHead>
-											<TableHead className="min-w-[100px] md:min-w-[50px]">
-												Meal Type
-											</TableHead>
-											<TableHead className="hidden md:table-cell min-w-[75px]">
-												Eating Out
-											</TableHead>
-											<TableHead className="min-w-[125px] md:min-w-[75px]">
-												Date
-											</TableHead>
-											<TableHead className="hidden md:table-cell min-w-[150px]">
-												Note
-											</TableHead>
-											<TableHead>Actions</TableHead>
+											<TableHead>Meal</TableHead>
+											<TableHead className="hidden xs:table-cell">Type</TableHead>
+											<TableHead className="hidden sm:table-cell">Out?</TableHead>
+											<TableHead>Date</TableHead>
+											<TableHead className="hidden md:table-cell">Note</TableHead>
+											<TableHead className="w-[60px]">Act.</TableHead>
 										</TableRow>
 									</TableHeader>
 
 									<TableBody>
-											{filteredMeals.map((meal) => (
+										{filteredMeals.map((meal) => (
 											<TableRow key={meal.mealID}>
-												<TableCell>
+												<TableCell className="font-medium">
 													{meal.mealName}
 												</TableCell>
-												<TableCell>
+												<TableCell className="hidden xs:table-cell">
 													{meal.mealType}
 												</TableCell>
-												<TableCell className="hidden md:table-cell">
-													{meal.eatingOut
-														? "Yes"
-														: "No"}
+												<TableCell className="hidden sm:table-cell">
+													{meal.eatingOut ? "Yes" : "No"}
 												</TableCell>
-												<TableCell>
-													{new Date(
-														meal.date
-													).toLocaleDateString(
-														"en-US",
-														{
-															year: "2-digit",
-															month: "2-digit",
-															day: "2-digit",
-														}
-													) +
-														" - " +
-														getShortenedDayOfWeek(
-															new Date(meal.date)
+												<TableCell className="whitespace-nowrap">
+													<span className="hidden xs:inline">
+														{new Date(meal.date).toLocaleDateString(
+															"en-US",
+															{
+																year: "2-digit",
+																month: "2-digit",
+																day: "2-digit",
+															}
 														)}
+													</span>
+													<span className="xs:hidden">
+														{new Date(meal.date).toLocaleDateString(
+															"en-US",
+															{
+																month: "numeric",
+																day: "numeric",
+															}
+														)}
+													</span>
+													<span className="hidden xs:inline">
+														{" - " + getShortenedDayOfWeek(new Date(meal.date))}
+													</span>
 												</TableCell>
 												<TableCell className="hidden md:table-cell">
 													{meal.note || ""}
 												</TableCell>
-												<TableCell>
+												<TableCell className="text-right">
 													<MealFormModal
 														meal={meal}
 														onSave={handleSaveMeal}
@@ -579,150 +642,118 @@ export default function Home() {
 										))}
 									</TableBody>
 
-									<TableFooter className="sticky bottom-0 z-10 dark:bg-gray-700 bg-gray-200">
+									<TableFooter className="sticky bottom-0 z-10 dark:bg-gray-800/90 bg-gray-100/90 backdrop-blur-sm">
 										<TableRow>
 											<TableCell
-												colSpan={3}
-												className="font-semibold"
+												colSpan={2}
+												className="font-medium"
 											>
-												Total Eaten Out vs In
+												Out vs In
 											</TableCell>
-											<TableCell className="hidden md:table-cell" />
-											<TableCell className="hidden md:table-cell" />
-											<TableCell className="text-right">
-												{
-													filteredMeals.filter(
-														(m) => m.eatingOut
-													).length
-												}{" "}
-												-{" "}
-												{
-													filteredMeals.filter(
-														(m) => !m.eatingOut
-													).length
-												}
+											<TableCell className="hidden sm:table-cell" />
+											<TableCell colSpan={3} className="text-right">
+												{filteredMeals.filter((m) => m.eatingOut).length}{" "}
+												vs{" "}
+												{filteredMeals.filter((m) => !m.eatingOut).length}
 											</TableCell>
 										</TableRow>
 									</TableFooter>
 								</Table>
 							</ScrollArea>
 						</div>
+
+						{/* Filters and Controls */}
+						<div className="w-full space-y-4">
+							{/* Filter Badges */}
+							{(mealTypeFilter !== null || eatingOutFilter !== null) && (
+								<div className="flex flex-wrap gap-2 items-center">
+									<span className="text-sm text-muted-foreground">Active Filters:</span>
+									{mealTypeFilter && (
+										<Badge variant="secondary" className="flex items-center gap-1">
+											{mealTypeFilter}
+											<X 
+												size={14} 
+												className="cursor-pointer ml-1" 
+												onClick={() => setMealTypeFilter(null)} 
+											/>
+										</Badge>
+									)}
+									{eatingOutFilter !== null && (
+										<Badge variant="secondary" className="flex items-center gap-1">
+											{eatingOutFilter ? "Eating Out" : "Eating In"}
+											<X 
+												size={14} 
+												className="cursor-pointer ml-1" 
+												onClick={() => setEatingOutFilter(null)} 
+											/>
+										</Badge>
+									)}
+								</div>
+							)}
+
+							{/* Controls */}
+							<div className="flex flex-col xs:flex-row gap-2 flex-wrap">
+								<MealFormModal onSave={handleSaveMeal} />
+								
+								<div className="flex gap-2 flex-1 flex-wrap">
+									<DropdownMenu>
+										<DropdownMenuTrigger asChild>
+											<Button variant="outline" className="flex items-center gap-1 flex-1 xs:flex-none">
+												<FilterIcon size={16} />
+												<span className="hidden xs:inline">Filter</span> Out/In
+												<ChevronDown size={14} className="opacity-70" />
+											</Button>
+										</DropdownMenuTrigger>
+										<DropdownMenuContent align="end">
+											<DropdownMenuItem onClick={() => setEatingOutFilter(null)}>
+												All
+											</DropdownMenuItem>
+											<DropdownMenuItem onClick={() => setEatingOutFilter(true)}>
+												Eating Out
+											</DropdownMenuItem>
+											<DropdownMenuItem onClick={() => setEatingOutFilter(false)}>
+												Eating In
+											</DropdownMenuItem>
+										</DropdownMenuContent>
+									</DropdownMenu>
+									
+									<DropdownMenu>
+										<DropdownMenuTrigger asChild>
+											<Button variant="outline" className="flex items-center gap-1 flex-1 xs:flex-none">
+												<FilterIcon size={16} />
+												<span className="hidden xs:inline">Filter</span> Type
+												<ChevronDown size={14} className="opacity-70" />
+											</Button>
+										</DropdownMenuTrigger>
+										<DropdownMenuContent align="end">
+											<DropdownMenuItem onClick={() => setMealTypeFilter(null)}>
+												All
+											</DropdownMenuItem>
+											<DropdownMenuItem onClick={() => setMealTypeFilter("Breakfast")}>
+												Breakfast
+											</DropdownMenuItem>
+											<DropdownMenuItem onClick={() => setMealTypeFilter("Lunch")}>
+												Lunch
+											</DropdownMenuItem>
+											<DropdownMenuItem onClick={() => setMealTypeFilter("Dinner")}>
+												Dinner
+											</DropdownMenuItem>
+										</DropdownMenuContent>
+									</DropdownMenu>
+									
+									<div className="ml-auto">
+										<ModeToggle />
+									</div>
+								</div>
+							</div>
+						</div>
 					</div>
 				)}
-
-				<div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mt-4 flex-wrap justify-center sm:justify-start w-full">
-					<Button
-						className="w-full sm:w-auto"
-						onClick={() => setChartView("last7Days")}
-					>
-						Last 7 Days
-					</Button>
-					<Button
-						className="w-full sm:w-auto"
-						onClick={() => setChartView("currentMonth")}
-					>
-						Current Month
-					</Button>
-					<Button
-						className="w-full sm:w-auto"
-						onClick={() => setChartView("allTimebyMonth")}
-					>
-						All Time by Month
-					</Button>
-					<Button
-						className="w-full sm:w-auto"
-						onClick={() => setChartView("allTimebyDay")}
-					>
-						All Time by Day
-					</Button>
-					<Button
-						className="w-full sm:w-auto"
-						onClick={() =>
-							setChartView("rollingEatingOutPercentage")
-						}
-					>
-						Rolling Eating Out Percentage
-					</Button>
-				</div>
-				<Separator className="dark:bg-gray-700" />
-
-				<div className="flex gap-2 sm:gap-4 items-center flex-col sm:flex-row">
-					<MealFormModal onSave={handleSaveMeal} />
-					<DropdownMenu>
-						<DropdownMenuTrigger asChild>
-							<Button>
-								Filter Meal by Eating Out/In
-							</Button>
-						</DropdownMenuTrigger>
-						<DropdownMenuContent align="end">
-							<DropdownMenuItem onClick={() => setEatingOutFilter(null)}>
-								All
-							</DropdownMenuItem>
-							<DropdownMenuItem onClick={() => setEatingOutFilter(true)}>
-								Eating Out
-							</DropdownMenuItem>
-							<DropdownMenuItem onClick={() => setEatingOutFilter(false)}>
-								Eating In
-							</DropdownMenuItem>
-						</DropdownMenuContent>
-					</DropdownMenu>
-					<DropdownMenu>
-						<DropdownMenuTrigger asChild>
-							<Button>
-								Filter Meal by Type
-							</Button>
-						</DropdownMenuTrigger>
-						<DropdownMenuContent align="end">
-							<DropdownMenuItem onClick={() => setMealTypeFilter(null)}>
-								All
-							</DropdownMenuItem>
-							<DropdownMenuItem onClick={() => setMealTypeFilter("Breakfast")}>
-								Breakfast
-							</DropdownMenuItem>
-							<DropdownMenuItem onClick={() => setMealTypeFilter("Lunch")}>
-								Lunch
-							</DropdownMenuItem>
-							<DropdownMenuItem onClick={() => setMealTypeFilter("Dinner")}>
-								Dinner
-							</DropdownMenuItem>
-						</DropdownMenuContent>
-					</DropdownMenu>
-					<ModeToggle />
-				</div>
-				
-				{/* Active Filters Display */}
-				{(mealTypeFilter !== null || eatingOutFilter !== null) && (
-					<div className="flex flex-wrap gap-2 items-center mt-2">
-						<span className="text-sm text-muted-foreground mr-1">Active Filters:</span>
-						{mealTypeFilter && (
-							<Badge variant="secondary" className="flex items-center gap-1">
-								Meal: {mealTypeFilter}
-								<X 
-									size={14} 
-									className="cursor-pointer" 
-									onClick={() => setMealTypeFilter(null)} 
-								/>
-							</Badge>
-						)}
-						{eatingOutFilter !== null && (
-							<Badge variant="secondary" className="flex items-center gap-1">
-								{eatingOutFilter ? "Eating Out" : "Eating In"}
-								<X 
-									size={14} 
-									className="cursor-pointer" 
-									onClick={() => setEatingOutFilter(null)} 
-								/>
-							</Badge>
-						)}
-					</div>
-				)}
-				
-				<Separator className="dark:bg-gray-700" />
 			</main>
 
-			<footer className="row-start-3 flex gap-4 sm:gap-6 flex-wrap items-center justify-center  w-full">
+			<footer className="mt-auto pt-8 flex gap-4 items-center justify-center w-full border-t dark:border-gray-800 border-gray-200">
 				<a
-					className="flex items-center gap-2"
+					className="flex items-center gap-2 py-4"
 					href="https://www.adamsulemanji.com"
 					target="_blank"
 					rel="noopener noreferrer"

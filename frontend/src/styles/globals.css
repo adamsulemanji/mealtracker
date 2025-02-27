@@ -91,14 +91,45 @@ body {
   }
 }
 
-
-
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  /* Add new custom utility for extra small screens */
+  .xs\:table-cell {
+    @media (min-width: 480px) {
+      display: table-cell;
+    }
+  }
+  
+  .xs\:inline {
+    @media (min-width: 480px) {
+      display: inline;
+    }
+  }
+  
+  .xs\:hidden {
+    @media (min-width: 480px) {
+      display: none;
+    }
+  }
+  
+  .xs\:flex-row {
+    @media (min-width: 480px) {
+      flex-direction: row;
+    }
+  }
+  
+  .xs\:flex-none {
+    @media (min-width: 480px) {
+      flex: none;
+    }
   }
 }
 
