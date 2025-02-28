@@ -27,6 +27,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -42,7 +43,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import { X, FilterIcon, ChevronDown } from "lucide-react";
+import { X, FilterIcon, ChevronDown, Search } from "lucide-react";
 import { type ChartConfig } from "@/components/ui/chart";
 
 const chartConfig = {
@@ -71,6 +72,9 @@ export default function Home() {
 	const [phrase, setPhrase] = useState<string>("");
 	const [mealTypeFilter, setMealTypeFilter] = useState<string | null>(null);
 	const [eatingOutFilter, setEatingOutFilter] = useState<boolean | null>(null);
+	const [searchQuery, setSearchQuery] = useState<string>("");
+	const [editingMeal, setEditingMeal] = useState<MealForm | null>(null);
+	const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
 
 	const apiURL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -302,6 +306,8 @@ export default function Home() {
 			description: "Meal saved successfully",
 			variant: "default",
 		});
+		setEditingMeal(null);
+		setIsEditModalOpen(false);
 	};
 
 	// --------------
@@ -318,6 +324,11 @@ export default function Home() {
 		return phrases[randomIndex];
 	}
 
+	const handleRowClick = (meal: MealForm) => {
+		setEditingMeal(meal);
+		setIsEditModalOpen(true);
+	};
+
 	// --------------
 	// Lifecycle
 	// --------------
@@ -328,19 +339,44 @@ export default function Home() {
 	}, []);
 
 	// --------------
-	// Chart logic
+	// Search & Filter Logic
 	// --------------
 
-	const filteredMeals = useMemo(
-		() =>
-			meals.filter((m) => {
-				const passesMealType = mealTypeFilter ? m.mealType === mealTypeFilter : true;
-				const passesEatingOut =
-					eatingOutFilter !== null ? m.eatingOut === eatingOutFilter : true;
+	const filteredMeals = useMemo(() => {
+		return meals.filter((m) => {
+			// Apply type filter
+			const passesMealType = mealTypeFilter ? m.mealType === mealTypeFilter : true;
+			
+			// Apply eating out filter
+			const passesEatingOut = eatingOutFilter !== null ? m.eatingOut === eatingOutFilter : true;
+			
+			// Apply search query
+			const query = searchQuery.toLowerCase().trim();
+			if (!query) {
 				return passesMealType && passesEatingOut;
-			}),
-		[meals, mealTypeFilter, eatingOutFilter]
-	);
+			}
+			
+			// Check if the query matches any of the meal properties
+			const mealDate = new Date(m.date).toLocaleDateString().toLowerCase();
+			const isEatingOutMatch = 
+				query === "out" ? m.eatingOut : 
+				query === "in" ? !m.eatingOut : false;
+			
+			return (
+				passesMealType && 
+				passesEatingOut && 
+				(m.mealName.toLowerCase().includes(query) ||
+				m.mealType.toLowerCase().includes(query) ||
+				mealDate.includes(query) ||
+				(m.note && m.note.toLowerCase().includes(query)) ||
+				isEatingOutMatch)
+			);
+		});
+	}, [meals, mealTypeFilter, eatingOutFilter, searchQuery]);
+
+	// --------------
+	// Chart logic
+	// --------------
 
 	const chartData = useMemo(() => {
 		switch (chartView) {
@@ -414,256 +450,278 @@ export default function Home() {
 					</div>
 				) : (
 					<div className="flex flex-col w-full gap-6 md:gap-8">
-						{/* Chart Section */}
-						<div className="w-full">
-							<h2 className="text-xl sm:text-2xl font-bold text-center mb-4">
-								{chartTitle}
-							</h2>
-							<div className="h-[300px] sm:h-[350px] md:h-[400px] w-full px-2">
-								<ChartContainer
-									config={chartConfig}
-									className="w-full h-full"
-								>
-									<ResponsiveContainer width="100%" height="100%">
-										{chartView === "rollingEatingOutPercentage" ? (
-											<LineChart data={chartData}>
-												<XAxis 
-													dataKey="date" 
-													tick={{ fontSize: 10 }}
-													interval="preserveStartEnd"
-													tickMargin={5}
-												/>
-												<YAxis
-													label={{
-														value: `Percentage`,
-														style: { textAnchor: "middle" },
-														angle: -90,
-														position: "left",
-														offset: 0,
-													}}
-													tick={{ fontSize: 10 }}
-													width={45}
-												/>
-												<ChartTooltip
-													content={({
-														active,
-														payload,
-														label,
-													}) => {
-														if (
-															active &&
-															payload &&
-															payload.length
-														) {
-															return (
-																<div className="p-2 border rounded bg-white dark:bg-[#1B1D17]">
-																	<p className="font-bold m-0">{label}</p>
-																	<p className="m-0">
-																		Eating Out Percentage:{" "}
-																		{typeof payload[0]?.value === "number"
-																			? payload[0]?.value.toFixed(2)
-																			: "0"}
-																		%
-																	</p>
-																</div>
-															);
-														}
-														return null;
-													}}
-												/>
-												
-												<Legend />
-												<CartesianGrid vertical={false} />
-												<Line
-													dataKey="eatenOutPercentage"
-													stroke="#f9a8d4"
-													strokeWidth={2}
-													dot={false}
-													activeDot={{ r: 5 }}
-													name="Eating Out Percentage"
-												/>
-											</LineChart>
-										) : (
-											<BarChart data={chartData}>
-												<XAxis 
-													dataKey="date" 
-													tick={{ fontSize: 10 }}
-													interval="preserveStartEnd"
-													tickMargin={5}
-												/>
-												<YAxis tick={{ fontSize: 10 }} width={30} />
-												<ChartTooltip
-													content={
-														<ChartTooltipContent
-															labelFormatter={(label) =>
-																`# of ${
-																	label === "eatenOut"
-																		? "Eaten Out Meals"
-																		: "Eaten Meals"
-																}`
-															}
-														/>
-													}
-												/>
-												<Legend wrapperStyle={{ fontSize: '12px' }} />
-												<CartesianGrid vertical={false} />
-												<Bar
-													dataKey="eatenOut"
-													stackId="a"
-													fill="#fbcfe8"
-													radius={[4, 4, 0, 0]}
-													name="Eaten Out"
-												/>
-												<Bar
-													dataKey="notEatenOut"
-													stackId="a"
-													fill="#f9a8d4"
-													radius={[4, 4, 0, 0]}
-													name="Eaten In"
-												/>
-											</BarChart>
-										)}
-									</ResponsiveContainer>
-								</ChartContainer>
-							</div>
-						</div>
+						{/* Search and Controls */}
+						
 
-						{/* Chart Buttons */}
-						<div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 w-full">
-							<Button
-								size="sm"
-								variant={chartView === "last7Days" ? "default" : "outline"}
-								className="text-xs sm:text-sm"
-								onClick={() => setChartView("last7Days")}
-							>
-								Last 7 Days
-							</Button>
-							<Button
-								size="sm"
-								variant={chartView === "currentMonth" ? "default" : "outline"}
-								className="text-xs sm:text-sm"
-								onClick={() => setChartView("currentMonth")}
-							>
-								Current Month
-							</Button>
-							<Button
-								size="sm"
-								variant={chartView === "allTimebyMonth" ? "default" : "outline"}
-								className="text-xs sm:text-sm"
-								onClick={() => setChartView("allTimebyMonth")}
-							>
-								All Time by Month
-							</Button>
-							<Button
-								size="sm"
-								variant={chartView === "allTimebyDay" ? "default" : "outline"}
-								className="text-xs sm:text-sm"
-								onClick={() => setChartView("allTimebyDay")}
-							>
-								All Time by Day
-							</Button>
-							<Button
-								size="sm"
-								variant={chartView === "rollingEatingOutPercentage" ? "default" : "outline"}
-								className="text-xs sm:text-sm col-span-2 sm:col-span-1"
-								onClick={() =>
-									setChartView("rollingEatingOutPercentage")
-								}
-							>
-								Rolling %
-							</Button>
-						</div>
-
-						<Separator className="dark:bg-gray-700" />
-
-						{/* Table Section */}
-						<div className="w-full">
-							<h3 className="text-lg font-medium mb-2">Meal History</h3>
-							<ScrollArea className="h-[300px] sm:h-[400px] w-full border rounded-md">
-								<Table className="w-full">
-									<TableHeader className="sticky top-0 dark:bg-gray-800/90 bg-gray-100/90 backdrop-blur-sm z-10">
-										<TableRow>
-											<TableHead>Meal</TableHead>
-											<TableHead className="hidden xs:table-cell">Type</TableHead>
-											<TableHead className="hidden sm:table-cell">Out?</TableHead>
-											<TableHead>Date</TableHead>
-											<TableHead className="hidden md:table-cell">Note</TableHead>
-											<TableHead className="w-[60px]">Act.</TableHead>
-										</TableRow>
-									</TableHeader>
-
-									<TableBody>
-										{filteredMeals.map((meal) => (
-											<TableRow key={meal.mealID}>
-												<TableCell className="font-medium">
-													{meal.mealName}
-												</TableCell>
-												<TableCell className="hidden xs:table-cell">
-													{meal.mealType}
-												</TableCell>
-												<TableCell className="hidden sm:table-cell">
-													{meal.eatingOut ? "Yes" : "No"}
-												</TableCell>
-												<TableCell className="whitespace-nowrap">
-													<span className="hidden xs:inline">
-														{new Date(meal.date).toLocaleDateString(
-															"en-US",
-															{
-																year: "2-digit",
-																month: "2-digit",
-																day: "2-digit",
-															}
-														)}
-													</span>
-													<span className="xs:hidden">
-														{new Date(meal.date).toLocaleDateString(
-															"en-US",
-															{
-																month: "numeric",
-																day: "numeric",
-															}
-														)}
-													</span>
-													<span className="hidden xs:inline">
-														{" - " + getShortenedDayOfWeek(new Date(meal.date))}
-													</span>
-												</TableCell>
-												<TableCell className="hidden md:table-cell">
-													{meal.note || ""}
-												</TableCell>
-												<TableCell className="text-right">
-													<MealFormModal
-														meal={meal}
-														onSave={handleSaveMeal}
-														onDelete={deleteMeal}
+						{/* Chart and Table Section - Side by side on larger screens */}
+						<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+							{/* Chart Section */}
+							<div className="w-full">
+								<h2 className="text-xl sm:text-2xl font-bold text-center mb-4">
+									{chartTitle}
+								</h2>
+								<div className="h-[300px] sm:h-[350px] w-full px-2">
+									<ChartContainer
+										config={chartConfig}
+										className="w-full h-full"
+									>
+										<ResponsiveContainer width="100%" height="100%">
+											{chartView === "rollingEatingOutPercentage" ? (
+												<LineChart data={chartData}>
+													<XAxis 
+														dataKey="date" 
+														tick={{ fontSize: 10 }}
+														interval="preserveStartEnd"
+														tickMargin={5}
 													/>
+													<YAxis
+														label={{
+															value: `Percentage`,
+															style: { textAnchor: "middle" },
+															angle: -90,
+															position: "left",
+															offset: 0,
+														}}
+														tick={{ fontSize: 10 }}
+														width={45}
+													/>
+													<ChartTooltip
+														content={({
+															active,
+															payload,
+															label,
+														}) => {
+															if (
+																active &&
+																payload &&
+																payload.length
+															) {
+																return (
+																	<div className="p-2 border rounded bg-white dark:bg-[#1B1D17]">
+																		<p className="font-bold m-0">{label}</p>
+																		<p className="m-0">
+																			Eating Out Percentage:{" "}
+																			{typeof payload[0]?.value === "number"
+																				? payload[0]?.value.toFixed(2)
+																				: "0"}
+																			%
+																		</p>
+																	</div>
+																);
+															}
+															return null;
+														}}
+													/>
+													
+													<Legend />
+													<CartesianGrid vertical={false} />
+													<Line
+														dataKey="eatenOutPercentage"
+														stroke="#f9a8d4"
+														strokeWidth={2}
+														dot={false}
+														activeDot={{ r: 5 }}
+														name="Eating Out Percentage"
+													/>
+												</LineChart>
+											) : (
+												<BarChart data={chartData}>
+													<XAxis 
+														dataKey="date" 
+														tick={{ fontSize: 10 }}
+														interval="preserveStartEnd"
+														tickMargin={5}
+													/>
+													<YAxis tick={{ fontSize: 10 }} width={30} />
+													<ChartTooltip
+														content={
+															<ChartTooltipContent
+																labelFormatter={(label) =>
+																	`# of ${
+																		label === "eatenOut"
+																			? "Eaten Out Meals"
+																			: "Eaten Meals"
+																	}`
+																}
+															/>
+														}
+													/>
+													<Legend wrapperStyle={{ fontSize: '12px' }} />
+													<CartesianGrid vertical={false} />
+													<Bar
+														dataKey="eatenOut"
+														stackId="a"
+														fill="#fbcfe8"
+														radius={[4, 4, 0, 0]}
+														name="Eaten Out"
+													/>
+													<Bar
+														dataKey="notEatenOut"
+														stackId="a"
+														fill="#f9a8d4"
+														radius={[4, 4, 0, 0]}
+														name="Eaten In"
+													/>
+												</BarChart>
+											)}
+										</ResponsiveContainer>
+									</ChartContainer>
+								</div>
+								
+								{/* Chart Buttons */}
+								<div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 w-full mt-4">
+									<Button
+										size="sm"
+										variant={chartView === "last7Days" ? "default" : "outline"}
+										className="text-xs sm:text-sm"
+										onClick={() => setChartView("last7Days")}
+									>
+										Last 7 Days
+									</Button>
+									<Button
+										size="sm"
+										variant={chartView === "currentMonth" ? "default" : "outline"}
+										className="text-xs sm:text-sm"
+										onClick={() => setChartView("currentMonth")}
+									>
+										Current Month
+									</Button>
+									<Button
+										size="sm"
+										variant={chartView === "allTimebyMonth" ? "default" : "outline"}
+										className="text-xs sm:text-sm"
+										onClick={() => setChartView("allTimebyMonth")}
+									>
+										All Time by Month
+									</Button>
+									<Button
+										size="sm"
+										variant={chartView === "allTimebyDay" ? "default" : "outline"}
+										className="text-xs sm:text-sm"
+										onClick={() => setChartView("allTimebyDay")}
+									>
+										All Time by Day
+									</Button>
+									<Button
+										size="sm"
+										variant={chartView === "rollingEatingOutPercentage" ? "default" : "outline"}
+										className="text-xs sm:text-sm col-span-2 sm:col-span-1"
+										onClick={() =>
+											setChartView("rollingEatingOutPercentage")
+										}
+									>
+										Rolling %
+									</Button>
+								</div>
+							</div>
+
+							{/* Table Section */}
+							<div className="w-full">
+								<h3 className="text-lg font-medium mb-2">Meal History</h3>
+								<ScrollArea className="h-[400px] lg:h-[450px] w-full border rounded-md">
+									<Table className="w-full">
+										<TableHeader className="sticky top-0 dark:bg-gray-800 bg-gray-100 z-10">
+											<TableRow>
+												<TableHead>Meal</TableHead>
+												<TableHead className="table-cell">Type</TableHead>
+												<TableHead className="hidden sm:table-cell">Out?</TableHead>
+												<TableHead>Date</TableHead>
+												<TableHead className="hidden md:table-cell">Note</TableHead>
+												<TableHead className="w-[60px]">Act.</TableHead>
+											</TableRow>
+										</TableHeader>
+
+										<TableBody>
+											{filteredMeals.map((meal) => (
+												<TableRow 
+													key={meal.mealID} 
+													onClick={() => handleRowClick(meal)}
+													className="cursor-pointer hover:bg-muted/50"
+												>
+													<TableCell className="font-medium">
+														{meal.mealName}
+													</TableCell>
+													<TableCell className="table-cell">
+														{meal.mealType}
+													</TableCell>
+													<TableCell className="hidden sm:table-cell">
+														{meal.eatingOut ? "Yes" : "No"}
+													</TableCell>
+													<TableCell className="whitespace-nowrap">
+														<span className="hidden xs:inline">
+															{new Date(meal.date).toLocaleDateString(
+																"en-US",
+																{
+																	year: "2-digit",
+																	month: "2-digit",
+																	day: "2-digit",
+																}
+															)}
+														</span>
+														<span className="xs:hidden">
+															{new Date(meal.date).toLocaleDateString(
+																"en-US",
+																{
+																	month: "numeric",
+																	day: "numeric",
+																	year:"numeric",
+																}
+															)}
+														</span>
+														<span className="hidden xs:inline">
+															{" - " + getShortenedDayOfWeek(new Date(meal.date))}
+														</span>
+													</TableCell>
+													<TableCell className="hidden md:table-cell">
+														{meal.note || ""}
+													</TableCell>
+													<TableCell 
+														className="text-right"
+														onClick={(e) => e.stopPropagation()}
+													>
+														<MealFormModal
+															meal={meal}
+															onSave={handleSaveMeal}
+															onDelete={deleteMeal}
+														/>
+													</TableCell>
+												</TableRow>
+											))}
+										</TableBody>
+
+										<TableFooter className="sticky bottom-0 z-10 dark:bg-gray-800 bg-gray-100">
+											<TableRow>
+												<TableCell
+													colSpan={2}
+													className="font-medium"
+												>
+													Out vs In
+												</TableCell>
+												<TableCell className="hidden sm:table-cell" />
+												<TableCell colSpan={3} className="text-right">
+													{filteredMeals.filter((m) => m.eatingOut).length}{" "}
+													vs{" "}
+													{filteredMeals.filter((m) => !m.eatingOut).length}
 												</TableCell>
 											</TableRow>
-										))}
-									</TableBody>
-
-									<TableFooter className="sticky bottom-0 z-10 dark:bg-gray-800/90 bg-gray-100/90 backdrop-blur-sm">
-										<TableRow>
-											<TableCell
-												colSpan={2}
-												className="font-medium"
-											>
-												Out vs In
-											</TableCell>
-											<TableCell className="hidden sm:table-cell" />
-											<TableCell colSpan={3} className="text-right">
-												{filteredMeals.filter((m) => m.eatingOut).length}{" "}
-												vs{" "}
-												{filteredMeals.filter((m) => !m.eatingOut).length}
-											</TableCell>
-										</TableRow>
-									</TableFooter>
-								</Table>
-							</ScrollArea>
+										</TableFooter>
+									</Table>
+								</ScrollArea>
+							</div>
 						</div>
-
-						{/* Filters and Controls */}
 						<div className="w-full space-y-4">
+							{/* Search Bar */}
+							<div className="relative">
+								<Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+								<Input
+									type="search"
+									placeholder="Search meals by name, type, date, or 'out'/'in'..."
+									className="pl-9 w-full"
+									value={searchQuery}
+									onChange={(e) => setSearchQuery(e.target.value)}
+								/>
+							</div>
+
 							{/* Filter Badges */}
 							{(mealTypeFilter !== null || eatingOutFilter !== null) && (
 								<div className="flex flex-wrap gap-2 items-center">
@@ -747,6 +805,7 @@ export default function Home() {
 								</div>
 							</div>
 						</div>
+
 					</div>
 				)}
 			</main>
@@ -771,6 +830,17 @@ export default function Home() {
 					</p>
 				</a>
 			</footer>
+
+			{/* Edit Modal that opens when clicking on a row */}
+			{editingMeal && (
+				<MealFormModal 
+					meal={editingMeal}
+					onSave={handleSaveMeal}
+					onDelete={deleteMeal}
+					isOpen={isEditModalOpen}
+					onOpenChange={setIsEditModalOpen}
+				/>
+			)}
 		</div>
 	);
 }

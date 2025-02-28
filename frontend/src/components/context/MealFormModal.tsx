@@ -34,13 +34,31 @@ const defaultMealData: MealForm = {
   note: "",
 };
 
-function MealFormModal({ meal, onSave, onDelete }: MealFormProps) {
-  const [open, setOpen] = React.useState(false);
+interface ExtendedMealFormProps extends MealFormProps {
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+function MealFormModal({ 
+  meal, 
+  onSave, 
+  onDelete, 
+  isOpen, 
+  onOpenChange 
+}: ExtendedMealFormProps) {
+  const [open, setOpen] = React.useState(isOpen || false);
   const [mealData, setMealData] = React.useState<MealForm>(
     meal ?? defaultMealData
   );
 
   const apiURL = process.env.NEXT_PUBLIC_API_URL;
+
+  React.useEffect(() => {
+    // Update open state if controlled externally
+    if (isOpen !== undefined) {
+      setOpen(isOpen);
+    }
+  }, [isOpen]);
 
   React.useEffect(() => {
     // Whenever the `meal` prop changes (i.e., user clicked Edit on a different meal),
@@ -51,6 +69,13 @@ function MealFormModal({ meal, onSave, onDelete }: MealFormProps) {
 
   const handleDateChange = (selectedDate: Date) => {
     setMealData((prev) => ({ ...prev, date: selectedDate }));
+  };
+
+  const handleOpenChange = (newOpen: boolean) => {
+    setOpen(newOpen);
+    if (onOpenChange) {
+      onOpenChange(newOpen);
+    }
   };
 
   const handleSubmit = async () => {
@@ -68,7 +93,7 @@ function MealFormModal({ meal, onSave, onDelete }: MealFormProps) {
 
       // Reset the form after saving
       setMealData(defaultMealData);
-      setOpen(false);
+      handleOpenChange(false);
     } catch (error) {
       console.error("Failed to create/update meal:", error);
     }
@@ -78,14 +103,16 @@ function MealFormModal({ meal, onSave, onDelete }: MealFormProps) {
     if (!mealData.mealID || !onDelete) return;
     onDelete(mealData.mealID);
     setMealData(defaultMealData);
-    setOpen(false);
+    handleOpenChange(false);
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="default">{meal ? "Edit" : "Add New Meal"}</Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      {!isOpen && (
+        <DialogTrigger asChild>
+          <Button variant="default">{meal ? "Edit" : "Add New Meal"}</Button>
+        </DialogTrigger>
+      )}
 
       <DialogContent className="w-full max-w-lg mx-auto p-4 sm:p-6 md:p-6">
         <DialogHeader>
