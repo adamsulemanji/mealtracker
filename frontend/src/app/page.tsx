@@ -75,6 +75,7 @@ export default function Home() {
 	const [searchQuery, setSearchQuery] = useState<string>("");
 	const [editingMeal, setEditingMeal] = useState<MealForm | null>(null);
 	const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
+	const [lookbackPeriod, setLookbackPeriod] = useState<number>(30); // Default to 30 days lookback
 
 	const apiURL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -217,23 +218,64 @@ export default function Home() {
 		const sortedMeals = [...meals].sort(
 			(a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
 		);
-		let cumulativeTotal = 0;
-		let cumulativeEatenOut = 0;
-
-		const cumulativeData = sortedMeals.map((meal) => {
-			cumulativeTotal += 1;
-			if (meal.eatingOut) cumulativeEatenOut += 1;
-			return {
-				date: new Date(meal.date).toLocaleDateString("en-US", {
+		
+		// Group meals by date to calculate daily values
+		const mealsByDate: Record<string, { total: number, eatenOut: number }> = {};
+		
+		sortedMeals.forEach(meal => {
+			const dateStr = new Date(meal.date).toISOString().split('T')[0];
+			
+			if (!mealsByDate[dateStr]) {
+				mealsByDate[dateStr] = { total: 0, eatenOut: 0 };
+			}
+			
+			mealsByDate[dateStr].total += 1;
+			if (meal.eatingOut) mealsByDate[dateStr].eatenOut += 1;
+		});
+		
+		// Convert to array of dates with rolling calculations
+		const dates = Object.keys(mealsByDate).sort();
+		const result = [];
+		
+		if (dates.length === 0) return [];
+		
+		for (let i = 0; i < dates.length; i++) {
+			const currentDate = dates[i];
+			let periodStartIdx = 0; // Default to first date for "All Time"
+			
+			// Find the start index for our lookback period
+			if (lookbackPeriod > 0) {
+				const currentDateTime = new Date(currentDate).getTime();
+				const lookbackTime = currentDateTime - (lookbackPeriod * 24 * 60 * 60 * 1000);
+				
+				// Find the earliest date that falls within our lookback period
+				periodStartIdx = i; // Start from current date and go back
+				while (periodStartIdx > 0 && new Date(dates[periodStartIdx - 1]).getTime() >= lookbackTime) {
+					periodStartIdx--;
+				}
+			}
+			
+			// Calculate totals for the period
+			let periodTotal = 0;
+			let periodEatenOut = 0;
+			
+			for (let j = periodStartIdx; j <= i; j++) {
+				periodTotal += mealsByDate[dates[j]].total;
+				periodEatenOut += mealsByDate[dates[j]].eatenOut;
+			}
+			
+			const percentage = periodTotal > 0 ? (periodEatenOut / periodTotal) * 100 : 0;
+			
+			result.push({
+				date: new Date(currentDate).toLocaleDateString("en-US", {
 					month: "short",
 					day: "numeric",
 				}),
-				eatenOutPercentage:
-					(cumulativeEatenOut / cumulativeTotal) * 100,
-			};
-		});
-
-		return cumulativeData;
+				eatenOutPercentage: percentage,
+			});
+		}
+		
+		return result;
 	};
 
 	// -------------
@@ -393,7 +435,7 @@ export default function Home() {
 			default:
 				return [];
 		}
-	}, [filteredMeals, chartView]);
+	}, [filteredMeals, chartView, lookbackPeriod]);
 
 	const chartTitle = useMemo(() => {
 		const CurrentMonth = new Date().toLocaleString("default", {
@@ -409,11 +451,13 @@ export default function Home() {
 			case "allTimebyDay":
 				return "All Time By Day";
 			case "rollingEatingOutPercentage":
-				return "Rolling Eating Out Percentage";
+				return lookbackPeriod > 0 
+					? `Rolling Eating Out Percentage (${lookbackPeriod} Day${lookbackPeriod !== 1 ? 's' : ''})` 
+					: "Rolling Eating Out Percentage (All Time)";
 			default:
 				return "";
 		}
-	}, [chartView]);
+	}, [chartView, lookbackPeriod]);
 
 	// --------------
 	// Render
@@ -460,6 +504,36 @@ export default function Home() {
 								<h2 className="text-xl sm:text-2xl font-bold text-center mb-4">
 									{chartTitle}
 								</h2>
+								
+								{/* Lookback Period Input - show only for rolling percentage */}
+								{chartView === "rollingEatingOutPercentage" && (
+									<div className="flex items-center justify-center gap-2 mb-4">
+										<label htmlFor="lookbackPeriod" className="text-sm">
+											Lookback Period:
+										</label>
+										<div className="flex items-center gap-1">
+											<Input
+												id="lookbackPeriod"
+												type="number"
+												min="0"
+												max="365"
+												value={lookbackPeriod}
+												onChange={(e) => setLookbackPeriod(Math.max(0, parseInt(e.target.value) || 0))}
+												className="w-20 h-8 text-center"
+											/>
+											<span className="text-sm">days</span>
+											<Button 
+												variant="outline" 
+												size="sm"
+												className="h-8 px-2 ml-1"
+												onClick={() => setLookbackPeriod(0)}
+											>
+												All Time
+											</Button>
+										</div>
+									</div>
+								)}
+								
 								<div className="h-[300px] sm:h-[350px] w-full px-2">
 									<ChartContainer
 										config={chartConfig}
