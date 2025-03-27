@@ -24,13 +24,19 @@ export class LambdaConstruct extends Construct {
 			"MealFunction-prod",
 			{
 				code: lambda.DockerImageCode.fromImageAsset(
-					path.join(__dirname, "../api")
+					path.join(__dirname, "../api"),
+          {
+            buildArgs: {
+              "--platform": "linux/amd64",
+            },
+          }
 				),
 				memorySize: 512,
 				timeout: cdk.Duration.seconds(30),
 				environment: {
 					TABLE_NAME: dynamos[0].tableName,
 				},
+        architecture: lambda.Architecture.X86_64,
 			}
 		);
 
@@ -39,13 +45,19 @@ export class LambdaConstruct extends Construct {
       "MealFunction-dev",
       {
         code: lambda.DockerImageCode.fromImageAsset(
-          path.join(__dirname, "../api")
+          path.join(__dirname, "../api"),
+          {
+            buildArgs: {
+              "--platform": "linux/amd64",
+            },
+          }
         ),
         memorySize: 512,
         timeout: cdk.Duration.seconds(30),
         environment: {
           TABLE_NAME: dynamos[1].tableName,
         },
+        architecture: lambda.Architecture.X86_64,
       }
     );
   }
