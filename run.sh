@@ -3,6 +3,7 @@
 # Store the project root directory
 PROJECT_ROOT="$(pwd)"
 
+
 # Function to clean up processes on exit
 cleanup() {
     echo "Shutting down services..."
@@ -25,6 +26,9 @@ trap cleanup INT TERM
 
 echo "Starting services..."
 
+echo "Validating and Updating nvm version..."
+nvm use
+
 # Start the API service
 echo "Building and running API container..."
 cd "$PROJECT_ROOT/api"
@@ -43,7 +47,6 @@ docker run -d \
 # Start the frontend service
 echo "Starting frontend development server..."
 cd "$PROJECT_ROOT/frontend"
-nvm use
 npm run dev & FRONTEND_PID=$!
 
 echo "Both services are running!"
