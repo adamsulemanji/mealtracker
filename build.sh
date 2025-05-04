@@ -10,9 +10,3 @@ else
     echo "build.sh not found in frontend folder"
     exit 1
 fi
-
-# Navigate back to the root directory
-cd ..
-
-# Deploy using CDK
-cdk deploy

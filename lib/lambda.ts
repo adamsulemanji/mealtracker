@@ -7,6 +7,7 @@ import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 export class LambdaConstruct extends Construct {
   public readonly meals_prod: lambda.Function;
   public readonly meals_dev: lambda.Function
+  public readonly meals_go: lambda.Function
 
   constructor(
     scope: Construct,
@@ -60,5 +61,22 @@ export class LambdaConstruct extends Construct {
         architecture: lambda.Architecture.X86_64,
       }
     );
+
+    this.meals_go = new lambda.DockerImageFunction(
+      this,
+      "MealFunction-go",
+      {
+        code: lambda.DockerImageCode.fromImageAsset(
+          path.join(__dirname, "../go_api"),
+        ),
+        memorySize: 128,
+        timeout: cdk.Duration.seconds(30),
+        environment: {
+          TABLE_NAME: dynamos[0].tableName,
+        },
+        architecture: lambda.Architecture.X86_64,
+      }
+    );
+
   }
 }

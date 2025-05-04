@@ -288,7 +288,8 @@ export default function Home() {
 		try {
 			setIsLoading(true);
 			const response = await axios.get(`${apiURL}/meals`);
-			const sortedMeals = sortMeals(response.data).reverse();
+			const mealsData = response.data.items;
+			const sortedMeals = sortMeals(mealsData).reverse();
 			setMeals(sortedMeals);
 		} catch (error) {
 			console.error(error);

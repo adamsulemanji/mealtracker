@@ -10,7 +10,7 @@ export class ApiGatewayConstruct extends Construct {
 		super(scope, id);
 
 		this.api_prod = new apigateway.LambdaRestApi(this, "MealsAPIG-prod", {
-			handler: lambdas[0],
+			handler: lambdas[2],
 			proxy: true,
 			description:
 				"APIGateway Proxy service for Meals API for Production",
