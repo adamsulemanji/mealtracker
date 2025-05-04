@@ -4,7 +4,7 @@ import boto3
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, Dict, Any, Union
 from datetime import datetime
 from mangum import Mangum
 
@@ -44,7 +44,7 @@ class MealInfo(BaseModel):
 
 @app.get("/")
 def read_root():
-    return {"Hello": "World"}
+    return {"status": True, "items": {"Hello": "World"}}
 
 @app.get("/meals/{mealID}")
 def get_item(mealID: str):
@@ -52,7 +52,7 @@ def get_item(mealID: str):
     item = response.get("Item")
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
-    return item
+    return {"status": True, "items": item}
 
 @app.post("/meals")
 def create_item(item: MealInfo):
@@ -61,7 +61,7 @@ def create_item(item: MealInfo):
     item_data = item.dict()
     item_data["date"] = item_data["date"].isoformat()
     table.put_item(Item=item_data)
-    return {"success": True, "item": item}
+    return {"status": True, "items": item_data}
 
 @app.put("/meals/{mealID}")
 def update_item(mealID: str, item: MealInfo):
@@ -86,7 +86,9 @@ def update_item(mealID: str, item: MealInfo):
         },
         ReturnValues="ALL_NEW"
     )
-    return {"success": True, "item": item}
+    item_data = item.dict()
+    item_data["date"] = updated_date
+    return {"status": True, "items": item_data}
 
 @app.delete("/meals/{mealID}")
 def delete_item(mealID: str):
@@ -94,24 +96,25 @@ def delete_item(mealID: str):
     if "Item" not in response:
         raise HTTPException(status_code=404, detail="Item not found")
     table.delete_item(Key={"mealID": mealID})
-    return {"success": True, "message": f"Item with ID '{mealID}' deleted"}
+    return {"status": True, "items": {"mealID": mealID, "message": f"Item with ID '{mealID}' deleted"}}
 
-@app.get("/meals", response_model=List[MealInfo])
+@app.get("/meals", response_model=Dict[str, Any])
 def get_all_items():
     response = table.scan()
     items = response.get("Items", [])
     meal_infos = []
     for i in items:
         i["date"] = datetime.fromisoformat(i["date"])
-        meal_infos.append(MealInfo(**i))
-    return meal_infos
+        meal_infos.append(MealInfo(**i).dict())
+        meal_infos[-1]["date"] = meal_infos[-1]["date"].isoformat()
+    return {"status": True, "items": meal_infos}
 
 @app.delete("/meals")
 def delete_all_items():
     response = table.scan()
     items = response.get("Items", [])
     if not items:
-        return {"success": True, "message": "No items to delete"}
+        return {"status": True, "items": {"message": "No items to delete"}}
     for it in items:
         table.delete_item(Key={"mealID": it["mealID"]})
-    return {"success": True, "message": "All items deleted"}
+    return {"status": True, "items": {"message": "All items deleted", "count": len(items)}}
