@@ -44,6 +44,11 @@ docker run -d \
   -e AWS_DEFAULT_REGION=us-east-1 \
   fastapi-local
 
+
+# Open up localhost:3000 in the default browser
+echo "Opening frontend in the default browser..."
+xdg-open http://localhost:3000 2>/dev/null
+
 # Start the frontend service
 echo "Starting frontend development server..."
 cd "$PROJECT_ROOT/frontend"
@@ -53,6 +58,7 @@ echo "Both services are running!"
 echo "API is running in Docker container"
 echo "Frontend development server is running with PID: $FRONTEND_PID"
 echo "Press Ctrl+C to stop all services."
+
 
 # Keep the script running
 wait $FRONTEND_PID

@@ -5,4 +5,5 @@ export interface MealForm {
 	eatingOut: boolean;
 	date: Date;
 	note: string;
+	tags: string[];
 }

@@ -37,6 +37,7 @@ class MealInfo(BaseModel):
     eatingOut: bool
     date: datetime
     note: str
+    tags: List[str] = []
 
     class Config:
         json_encoders = { datetime: lambda dt: dt.isoformat() }
@@ -72,7 +73,7 @@ def update_item(mealID: str, item: MealInfo):
         Key={"mealID": mealID},
         UpdateExpression=(
             "SET mealName = :mealName, mealType = :mealType, "
-            "eatingOut = :eatingOut, #d = :date, note = :note"
+            "eatingOut = :eatingOut, #d = :date, note = :note, tags = :tags"
         ),
         ExpressionAttributeNames={"#d": "date"},
         ExpressionAttributeValues={
@@ -80,7 +81,8 @@ def update_item(mealID: str, item: MealInfo):
             ":mealType": item.mealType,
             ":eatingOut": item.eatingOut,
             ":date": updated_date,
-            ":note": item.note
+            ":note": item.note,
+            ":tags": item.tags
         },
         ReturnValues="ALL_NEW"
     )

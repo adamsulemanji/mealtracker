@@ -45,6 +45,7 @@ import {
 } from "@/components/ui/table";
 import { X, FilterIcon, ChevronDown, Search } from "lucide-react";
 import { type ChartConfig } from "@/components/ui/chart";
+import { TagInput } from "@/components/ui/tag-input";
 
 const chartConfig = {
 	desktop: {
@@ -76,6 +77,7 @@ export default function Home() {
 	const [editingMeal, setEditingMeal] = useState<MealForm | null>(null);
 	const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
 	const [lookbackPeriod, setLookbackPeriod] = useState<number>(30); // Default to 30 days lookback
+	const [tagFilter, setTagFilter] = useState<string | null>(null);
 
 	const apiURL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -392,10 +394,13 @@ export default function Home() {
 			// Apply eating out filter
 			const passesEatingOut = eatingOutFilter !== null ? m.eatingOut === eatingOutFilter : true;
 			
+			// Apply tag filter
+			const passesTagFilter = tagFilter ? m.tags.includes(tagFilter) : true;
+			
 			// Apply search query
 			const query = searchQuery.toLowerCase().trim();
 			if (!query) {
-				return passesMealType && passesEatingOut;
+				return passesMealType && passesEatingOut && passesTagFilter;
 			}
 			
 			// Check if the query matches any of the meal properties
@@ -404,17 +409,24 @@ export default function Home() {
 				query === "out" ? m.eatingOut : 
 				query === "in" ? !m.eatingOut : false;
 			
+			// Check if query matches any tags
+			const hasMatchingTag = m.tags && m.tags.some(tag => 
+				tag.toLowerCase().includes(query)
+			);
+			
 			return (
 				passesMealType && 
 				passesEatingOut && 
+				passesTagFilter &&
 				(m.mealName.toLowerCase().includes(query) ||
 				m.mealType.toLowerCase().includes(query) ||
 				mealDate.includes(query) ||
 				(m.note && m.note.toLowerCase().includes(query)) ||
+				hasMatchingTag ||
 				isEatingOutMatch)
 			);
 		});
-	}, [meals, mealTypeFilter, eatingOutFilter, searchQuery]);
+	}, [meals, mealTypeFilter, eatingOutFilter, tagFilter, searchQuery]);
 
 	// --------------
 	// Chart logic
@@ -714,6 +726,15 @@ export default function Home() {
 												>
 													<TableCell className="font-medium">
 														{meal.mealName}
+														{meal.tags && meal.tags.length > 0 && (
+															<div className="flex flex-wrap gap-1 mt-1">
+																{meal.tags.map(tag => (
+																	<Badge key={tag} variant="outline" className="text-xs px-1 py-0">
+																		{tag}
+																	</Badge>
+																))}
+															</div>
+														)}
 													</TableCell>
 													<TableCell className="table-cell">
 														{meal.mealType}
@@ -789,7 +810,7 @@ export default function Home() {
 								<Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
 								<Input
 									type="search"
-									placeholder="Search meals by name, type, date, or 'out'/'in'..."
+									placeholder="Search meals by name, type, date, tags, or 'out'/'in'..."
 									className="pl-9 w-full"
 									value={searchQuery}
 									onChange={(e) => setSearchQuery(e.target.value)}
@@ -797,7 +818,7 @@ export default function Home() {
 							</div>
 
 							{/* Filter Badges */}
-							{(mealTypeFilter !== null || eatingOutFilter !== null) && (
+							{(mealTypeFilter !== null || eatingOutFilter !== null || tagFilter !== null) && (
 								<div className="flex flex-wrap gap-2 items-center">
 									<span className="text-sm text-muted-foreground">Active Filters:</span>
 									{mealTypeFilter && (
@@ -817,6 +838,16 @@ export default function Home() {
 												size={14} 
 												className="cursor-pointer ml-1" 
 												onClick={() => setEatingOutFilter(null)} 
+											/>
+										</Badge>
+									)}
+									{tagFilter && (
+										<Badge variant="secondary" className="flex items-center gap-1">
+											{tagFilter}
+											<X 
+												size={14} 
+												className="cursor-pointer ml-1" 
+												onClick={() => setTagFilter(null)} 
 											/>
 										</Badge>
 									)}
@@ -870,6 +901,27 @@ export default function Home() {
 											<DropdownMenuItem onClick={() => setMealTypeFilter("Dinner")}>
 												Dinner
 											</DropdownMenuItem>
+										</DropdownMenuContent>
+									</DropdownMenu>
+									
+									<DropdownMenu>
+										<DropdownMenuTrigger asChild>
+											<Button variant="outline" className="flex items-center gap-1 flex-1 xs:flex-none">
+												<FilterIcon size={16} />
+												<span className="hidden xs:inline">Filter</span> Tags
+												<ChevronDown size={14} className="opacity-70" />
+											</Button>
+										</DropdownMenuTrigger>
+										<DropdownMenuContent align="end">
+											<DropdownMenuItem onClick={() => setTagFilter(null)}>
+												All Tags
+											</DropdownMenuItem>
+											<Separator />
+											{Array.from(new Set(meals.flatMap(m => m.tags))).map(tag => (
+												<DropdownMenuItem key={tag} onClick={() => setTagFilter(tag)}>
+													{tag}
+												</DropdownMenuItem>
+											))}
 										</DropdownMenuContent>
 									</DropdownMenu>
 									

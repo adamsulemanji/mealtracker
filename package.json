@@ -5,10 +5,11 @@
     "mealtracker": "bin/mealtracker.js"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "./build.sh",
     "watch": "tsc -w",
     "test": "jest",
-    "cdk": "cdk"
+    "cdk": "cdk",
+    "run": "./run.sh"
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",

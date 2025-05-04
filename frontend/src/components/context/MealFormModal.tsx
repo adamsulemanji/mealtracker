@@ -5,6 +5,7 @@ import axios from "axios";
 import { MealForm } from "@/interfaces/MealForm";
 import { MealFormProps } from "@/interfaces/MealFormProps";
 import { DatePickerDemo } from "@/components/context/DatePicker";
+import { TagInput } from "@/components/ui/tag-input";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -32,6 +33,7 @@ const defaultMealData: MealForm = {
   eatingOut: false,
   date: new Date(),
   note: "",
+  tags: [],
 };
 
 interface ExtendedMealFormProps extends MealFormProps {
@@ -181,6 +183,16 @@ function MealFormModal({
             }
             placeholder="Enter note"
             className="w-full"
+          />
+        </div>
+
+        {/* Tags */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-1">Tags</label>
+          <TagInput
+            tags={mealData.tags || []}
+            onChange={(newTags) => setMealData((prev) => ({ ...prev, tags: newTags }))}
+            placeholder="Add tags (press Enter)"
           />
         </div>
 
