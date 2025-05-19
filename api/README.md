@@ -4,7 +4,7 @@ This docker image is replicated for both ```dev``` and ```prod``` environments u
 
 ### Build the Docker Image
 ```sh
-docker build -t fastapi-local -f Dockerfile.dev .
+docker build -t fastapi-local .
 ```
 
 ### Run the Docker Container

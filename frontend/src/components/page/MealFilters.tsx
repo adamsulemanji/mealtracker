@@ -91,7 +91,7 @@ const MealFilters: React.FC<MealFiltersProps> = ({
 
       {/* Controls */}
       <div className="flex flex-col xs:flex-row gap-2 flex-wrap">
-        <Button onClick={onAddMeal}>Add New Meal</Button>
+        <Button onClick={onAddMeal}>Add New Meal <div className="text-xs italic">(Press 'N' key)</div></Button>
         
         <div className="flex gap-2 flex-1 flex-wrap">
           <DropdownMenu>
@@ -152,7 +152,7 @@ const MealFilters: React.FC<MealFiltersProps> = ({
                 All Tags
               </DropdownMenuItem>
               <Separator />
-              {Array.from(new Set(meals.flatMap(m => m.tags))).map(tag => (
+              {Array.from(new Set(meals.flatMap(m => m.tags || []))).map(tag => (
                 <DropdownMenuItem key={tag} onClick={() => setTagFilter(tag)}>
                   {tag}
                 </DropdownMenuItem>

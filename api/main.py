@@ -6,12 +6,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any, Union
 from datetime import datetime
+import re
 from mangum import Mangum
 
 app = FastAPI()
 
 # Add CORS middleware
 origins = [
+    "http://localhost:8000",
     "http://localhost:3000",
     "https://mealtracker.adamsulemanji.com"
 ]
@@ -26,7 +28,8 @@ app.add_middleware(
 
 handler = Mangum(app)
 
-table_name = os.environ.get("TABLE_NAME", "MyTable")
+# table_name = os.environ.get("TABLE_NAME", "MyTable")
+table_name = "MealsTable_prod"
 dynamodb = boto3.resource("dynamodb")
 table = dynamodb.Table(table_name)
 
@@ -104,7 +107,18 @@ def get_all_items():
     items = response.get("Items", [])
     meal_infos = []
     for i in items:
-        i["date"] = datetime.fromisoformat(i["date"])
+        # Fix for handling ISO date strings with 'Z' timezone indicator
+        date_str = i["date"]
+        if date_str.endswith('Z'):
+            date_str = date_str[:-1] + '+00:00'  # Replace Z with +00:00 for UTC
+        i["date"] = datetime.fromisoformat(date_str)
+
+        # Provide default values for optional fields if they are None
+        if i.get("note") is None:
+            i["note"] = ""
+        if i.get("tags") is None:
+            i["tags"] = []
+
         meal_infos.append(MealInfo(**i).dict())
         meal_infos[-1]["date"] = meal_infos[-1]["date"].isoformat()
     return {"status": True, "items": meal_infos}

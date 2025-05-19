@@ -79,12 +79,53 @@ export default function Home() {
 		try {
 			setIsLoading(true);
 			const response = await axios.get(`${apiURL}/meals`);
-			const mealsData = response.data.items;
-			const sortedMeals = sortMeals(mealsData).reverse();
+			
+			// Add defensive check for response structure
+			if (!response.data) {
+				console.error("API response has no data:", response);
+				toast({
+					title: "Error",
+					description: "Invalid API response format",
+					variant: "destructive",
+				});
+				return;
+			}
+			
+			// Log the response structure in development
+			if (process.env.NODE_ENV === 'development') {
+				console.log("API Response structure:", response.data);
+			}
+			
+			// Check for both possible structures (.items or direct array)
+			let mealsData = response.data.items || response.data.Items;
+			
+			// If neither exists, try to use the response data directly if it's an array
+			if (!mealsData && Array.isArray(response.data)) {
+				mealsData = response.data;
+			}
+			
+			// Final validation
+			if (!Array.isArray(mealsData)) {
+				console.error("Could not find meals array in API response", response.data);
+				toast({
+					title: "Error",
+					description: "Invalid meals data format from API",
+					variant: "destructive",
+				});
+				return;
+			}
+			
+			// Ensure tags is always an array for each meal
+			const normalizedMeals = mealsData.map(meal => ({
+				...meal,
+				tags: Array.isArray(meal.tags) ? meal.tags : []
+			}));
+			
+			const sortedMeals = sortMeals(normalizedMeals).reverse();
 			setMeals(sortedMeals);
 			
 			// Calculate streaks after fetching meals
-			calculateStreaks(mealsData);
+			calculateStreaks(normalizedMeals);
 		} catch (error) {
 			console.error(error);
 			toast({
@@ -180,13 +221,6 @@ export default function Home() {
 
 		// Add event listener
 		window.addEventListener('keydown', handleKeyDown);
-		setTimeout(() => {
-			toast({
-				title: "Pro Tip",
-				description: "Press 'N' key to quickly add a new meal",
-				variant: "default",
-			});
-		}, 2000);
 
 		// Clean up event listener on component unmount
 		return () => {
@@ -207,7 +241,7 @@ export default function Home() {
 			const passesEatingOut = eatingOutFilter !== null ? m.eatingOut === eatingOutFilter : true;
 			
 			// Apply tag filter
-			const passesTagFilter = tagFilter ? m.tags.includes(tagFilter) : true;
+			const passesTagFilter = tagFilter ? (Array.isArray(m.tags) && m.tags.includes(tagFilter)) : true;
 			
 			// Apply search query
 			const query = searchQuery.toLowerCase().trim();

@@ -120,6 +120,11 @@ func FindByID(ctx context.Context, mealID string) (*MealItem, error) {
 		return nil, err
 	}
 
+	// Ensure Tags is never nil in the response
+	if meal.Tags == nil {
+		meal.Tags = []string{} // Initialize to empty slice if nil
+	}
+
 	return &meal, nil
 }
 
@@ -140,6 +145,13 @@ func FindAll(ctx context.Context) ([]MealItem, error) {
 	if err != nil {
 		log.Printf("Failed to unmarshal: %v", err)
 		return nil, err
+	}
+
+	// Ensure Tags is never nil in the response
+	for i := range meals {
+		if meals[i].Tags == nil {
+			meals[i].Tags = []string{} // Initialize to empty slice if nil
+		}
 	}
 
 	return meals, nil
