@@ -132,12 +132,13 @@ function MealFormModal({
               setMealData((prev) => ({ ...prev, mealName: e.target.value }))
             }
             placeholder="Enter meal name"
+            className="mt-2"
           />
         </div>
 
         {/* Meal Type */}
         <div className="mb-4">
-          <label className="block text-sm font-medium">Meal Type</label>
+          <label className="block text-sm font-medium mb-2">Meal Type</label>
           <Select
             value={mealData.mealType}
             onValueChange={(value) =>
@@ -145,8 +146,7 @@ function MealFormModal({
                 ...prev,
                 mealType: value as "Breakfast" | "Lunch" | "Dinner",
               }))
-            }
-            
+            }            
           >
             <SelectTrigger>
               <SelectValue placeholder="Select meal type" />
@@ -167,6 +167,7 @@ function MealFormModal({
             onCheckedChange={(checked) =>
               setMealData((prev) => ({ ...prev, eatingOut: checked }))
             }
+            className="mt-2"
           />
         </div>
 
@@ -179,7 +180,7 @@ function MealFormModal({
               setMealData((prev) => ({ ...prev, note: e.target.value }))
             }
             placeholder="Enter note"
-            className="w-full"
+            className="w-full mt-2"
           />
         </div>
 
@@ -204,31 +205,31 @@ function MealFormModal({
         </div>
 
         <DialogFooter className="flex flex-col sm:flex-row sm:justify-end gap-3 sm:gap-2 mt-4">
-          <DialogClose asChild>
-            <Button variant="outline" size="sm" className="w-full sm:w-auto order-1 sm:order-1">
-              Cancel
-            </Button>
-          </DialogClose>
-
+          <Button 
+            onClick={handleSubmit} 
+            variant="default" 
+            size="sm" 
+            className="w-full sm:w-auto font-medium order-1 sm:order-1"
+          >
+            Save
+          </Button>
+          
           {meal && onDelete && (
             <Button
               onClick={handleDelete}
               variant="destructive"
               size="sm"
-              className="w-full sm:w-auto order-3 sm:order-2"
+              className="w-full sm:w-auto order-2 sm:order-2"
             >
               Delete
             </Button>
           )}
-
-          <Button 
-            onClick={handleSubmit} 
-            variant="default" 
-            size="sm" 
-            className="w-full sm:w-auto font-medium order-2 sm:order-3"
-          >
-            Save
-          </Button>
+          
+          <DialogClose asChild>
+            <Button variant="outline" size="sm" className="w-full sm:w-auto order-3 sm:order-3">
+              Cancel
+            </Button>
+          </DialogClose>
         </DialogFooter>
       </DialogContent>
     </Dialog>
