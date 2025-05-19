@@ -3,7 +3,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import { useToast } from "@/hooks/use-toast";
 import { MealForm } from "@/interfaces/MealForm";
-import { phrases } from "@/misc/phrases";
+import { phrases } from "@/utils/misc/phrases";
 import MealFormModal from "@/components/page/MealFormModal";
 import { Separator } from "@/components/ui/separator";
 import { type ChartConfig } from "@/components/ui/chart";
