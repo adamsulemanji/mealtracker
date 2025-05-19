@@ -109,12 +109,3 @@ def get_all_items():
         meal_infos[-1]["date"] = meal_infos[-1]["date"].isoformat()
     return {"status": True, "items": meal_infos}
 
-@app.delete("/meals")
-def delete_all_items():
-    response = table.scan()
-    items = response.get("Items", [])
-    if not items:
-        return {"status": True, "items": {"message": "No items to delete"}}
-    for it in items:
-        table.delete_item(Key={"mealID": it["mealID"]})
-    return {"status": True, "items": {"message": "All items deleted", "count": len(items)}}

@@ -164,23 +164,3 @@ func Delete(ctx context.Context, mealID string) error {
 
 	return nil
 }
-
-// DeleteAll removes all meals
-func DeleteAll(ctx context.Context) error {
-	// Get all items
-	meals, err := FindAll(ctx)
-	if err != nil {
-		return err
-	}
-
-	// Delete each item
-	for _, meal := range meals {
-		err := Delete(ctx, meal.MealID)
-		if err != nil {
-			log.Printf("Failed to delete item %s: %v", meal.MealID, err)
-			// Continue deletion despite errors
-		}
-	}
-
-	return nil
-}

@@ -18,28 +18,7 @@ export class LambdaConstruct extends Construct {
 
     // ******* Get the DynamoDB table name *******
     const mealsTableName = dynamos[0].tableName;
-
-    // ********** Lambda for Meals **********
-    this.meals_prod = new lambda.DockerImageFunction(
-			this,
-			"MealFunction-prod",
-			{
-				code: lambda.DockerImageCode.fromImageAsset(
-					path.join(__dirname, "../api"),
-          {
-            buildArgs: {
-              "--platform": "linux/amd64",
-            },
-          }
-				),
-				memorySize: 512,
-				timeout: cdk.Duration.seconds(30),
-				environment: {
-					TABLE_NAME: dynamos[0].tableName,
-				},
-        architecture: lambda.Architecture.X86_64,
-			}
-		);
+    const mealsTableNameDev = dynamos[1].tableName;
 
     this.meals_dev = new lambda.DockerImageFunction(
       this,
@@ -56,7 +35,7 @@ export class LambdaConstruct extends Construct {
         memorySize: 512,
         timeout: cdk.Duration.seconds(30),
         environment: {
-          TABLE_NAME: dynamos[1].tableName,
+          TABLE_NAME: mealsTableNameDev,
         },
         architecture: lambda.Architecture.X86_64,
       }
@@ -72,7 +51,7 @@ export class LambdaConstruct extends Construct {
         memorySize: 128,
         timeout: cdk.Duration.seconds(30),
         environment: {
-          TABLE_NAME: dynamos[0].tableName,
+          TABLE_NAME: mealsTableName,
         },
         architecture: lambda.Architecture.X86_64,
       }

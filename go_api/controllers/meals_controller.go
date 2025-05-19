@@ -228,21 +228,6 @@ func (c *MealsController) Destroy(ctx context.Context, mealID string) (events.AP
 	})
 }
 
-// DestroyAll removes all meals
-func (c *MealsController) DestroyAll(ctx context.Context) (events.APIGatewayProxyResponse, error) {
-	if err := models.DeleteAll(ctx); err != nil {
-		return respondJSON(500, ErrorResponse{
-			Message: "Failed to delete all meals",
-			Error:   err.Error(),
-		})
-	}
-
-	return respondJSON(200, SuccessResponse{
-		Success: true,
-		Message: "All meals deleted",
-	})
-}
-
 // NotFound returns a 404 response for non-existent routes
 func NotFound() (events.APIGatewayProxyResponse, error) {
 	return respondJSON(404, ErrorResponse{
