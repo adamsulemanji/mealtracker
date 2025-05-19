@@ -4,7 +4,7 @@ import axios from "axios";
 import { useToast } from "@/hooks/use-toast";
 import { MealForm } from "@/interfaces/MealForm";
 import { phrases } from "@/misc/phrases";
-import MealFormModal from "@/components/context/MealFormModal";
+import MealFormModal from "@/components/page/MealFormModal";
 import { Separator } from "@/components/ui/separator";
 import { type ChartConfig } from "@/components/ui/chart";
 

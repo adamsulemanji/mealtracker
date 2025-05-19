@@ -4,7 +4,7 @@ import * as React from "react";
 import axios from "axios";
 import { MealForm } from "@/interfaces/MealForm";
 import { MealFormProps } from "@/interfaces/MealFormProps";
-import { DatePickerDemo } from "@/components/context/DatePicker";
+import { DatePickerDemo } from "@/components/page/DatePicker";
 import { TagInput } from "@/components/ui/tag-input";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
