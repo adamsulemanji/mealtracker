@@ -166,25 +166,20 @@ export default function Home() {
 			if ((event.key === 'n' || event.key === 'N') && 
 				// Make sure no input elements are focused
 				!['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName || '')) {
+				event.preventDefault(); // Prevent the 'n' key from being entered in the form
 				handleAddMeal();
 			}
 		};
 
 		// Add event listener
 		window.addEventListener('keydown', handleKeyDown);
-
-		// Show shortcut toast if it's the first load (only once)
-		const hasShownHotKeyToast = localStorage.getItem('hasShownHotKeyToast');
-		if (!hasShownHotKeyToast) {
-			setTimeout(() => {
-				toast({
-					title: "Pro Tip",
-					description: "Press 'N' key to quickly add a new meal",
-					variant: "default",
-				});
-				localStorage.setItem('hasShownHotKeyToast', 'true');
-			}, 2000);
-		}
+		setTimeout(() => {
+			toast({
+				title: "Pro Tip",
+				description: "Press 'N' key to quickly add a new meal",
+				variant: "default",
+			});
+		}, 2000);
 
 		// Clean up event listener on component unmount
 		return () => {
