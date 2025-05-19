@@ -63,9 +63,6 @@ function MealFormModal({
   }, [isOpen]);
 
   React.useEffect(() => {
-    // Whenever the `meal` prop changes (i.e., user clicked Edit on a different meal),
-    // reset the internal form state to match that meal.
-    // If there's no `meal`, reset to default (for Add New).
     setMealData(meal ?? defaultMealData);
   }, [meal]);
 
@@ -89,7 +86,7 @@ function MealFormModal({
       } else {
         // Create a new meal
         const response = await axios.post(`${apiURL}/meals`, mealData);
-        const newMealData = { ...mealData, mealID: response.data.item.mealID };
+        const newMealData = { ...mealData, mealID: response.data.items.mealID };
         onSave(newMealData);
       }
 
@@ -206,29 +203,32 @@ function MealFormModal({
           />
         </div>
 
-        <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-4">
-          {/* Save button */}
-          <Button onClick={handleSubmit} variant="default" size="sm" className="w-full sm:w-auto">
-            Save
-          </Button>
+        <DialogFooter className="flex flex-col sm:flex-row sm:justify-end gap-3 sm:gap-2 mt-4">
+          <DialogClose asChild>
+            <Button variant="outline" size="sm" className="w-full sm:w-auto order-1 sm:order-1">
+              Cancel
+            </Button>
+          </DialogClose>
 
-          {/* Delete button (only when editing a meal) */}
           {meal && onDelete && (
             <Button
               onClick={handleDelete}
-              variant="secondary"
+              variant="destructive"
               size="sm"
-              className="w-full sm:w-auto"
+              className="w-full sm:w-auto order-3 sm:order-2"
             >
               Delete
             </Button>
           )}
 
-          <DialogClose asChild>
-            <Button variant="default" size="sm" className="w-full sm:w-auto">
-              Cancel
-            </Button>
-          </DialogClose>
+          <Button 
+            onClick={handleSubmit} 
+            variant="default" 
+            size="sm" 
+            className="w-full sm:w-auto font-medium order-2 sm:order-3"
+          >
+            Save
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
