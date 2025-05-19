@@ -291,101 +291,83 @@ export default function Home() {
 			return;
 		}
 
-		// Get unique dates and sort them in descending order (newest first)
-		const uniqueDates = [...new Set(mealsData.map(meal => 
-			new Date(meal.date).toISOString().split('T')[0]
-		))].sort().reverse();
+		// Get all dates with meal logs and normalize them to YYYY-MM-DD format
+		const mealDates = mealsData.map(meal => {
+			const date = new Date(meal.date);
+			return date.toISOString().split('T')[0]; // YYYY-MM-DD format
+		});
+		
+		// Create a set of unique dates
+		const uniqueDatesSet = new Set(mealDates);
+		
+		// Convert to array and sort (oldest to newest)
+		const uniqueDates = [...uniqueDatesSet].sort();
+		
+		// Get today and yesterday's dates in YYYY-MM-DD format
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
+		const todayStr = today.toISOString().split('T')[0];
+		
+		const yesterday = new Date(today);
+		yesterday.setDate(today.getDate() - 1);
+		const yesterdayStr = yesterday.toISOString().split('T')[0];
 
-		// Calculate current streak
-		let streak = 0;
-		let maxStreakCount = 0;
-		let currentDate = new Date();
+		// --- Calculate current streak ---
+		let currentStreak = 0;
 		
-		// Set time to midnight for consistent comparison
-		currentDate.setHours(0, 0, 0, 0);
+		// Check if there's an entry for today or yesterday to start the streak count
+		const hasToday = uniqueDatesSet.has(todayStr);
+		const hasYesterday = uniqueDatesSet.has(yesterdayStr);
 		
-		// Calculate days since epoch for easier date arithmetic
-		const currentDateEpoch = Math.floor(currentDate.getTime() / (24 * 60 * 60 * 1000));
-
-		// Build a set of days that have meals logged for faster lookup
-		const mealDaysSet = new Set(uniqueDates);
-		
-		// Check if there's a log for today
-		const todayStr = currentDate.toISOString().split('T')[0];
-		let hasTodayLog = mealDaysSet.has(todayStr);
-		
-		if (hasTodayLog) {
-			streak = 1;
+		if (hasToday || hasYesterday) {
+			// Start counting from today or yesterday
+			const startDate = hasToday ? today : yesterday;
+			currentStreak = 1; // Start with 1 for today/yesterday
 			
-			// Start checking from yesterday
-			let dayOffset = 1;
-			let checkingDate = new Date(currentDate);
-			checkingDate.setDate(currentDate.getDate() - dayOffset);
+			// Count back through previous days
+			let checkDate = new Date(startDate);
+			checkDate.setDate(checkDate.getDate() - (hasToday ? 1 : 0)); // If starting from today, first check is yesterday
 			
 			while (true) {
-				const checkDateStr = checkingDate.toISOString().split('T')[0];
-				if (mealDaysSet.has(checkDateStr)) {
-					streak++;
-					dayOffset++;
-					checkingDate.setDate(currentDate.getDate() - dayOffset);
+				const dateStr = checkDate.toISOString().split('T')[0];
+				if (uniqueDatesSet.has(dateStr)) {
+					currentStreak++;
+					checkDate.setDate(checkDate.getDate() - 1); // Move to previous day
 				} else {
-					break;
-				}
-			}
-		} else {
-			// If no log today, check if there was one yesterday to continue streak
-			const yesterdayDate = new Date(currentDate);
-			yesterdayDate.setDate(currentDate.getDate() - 1);
-			const yesterdayStr = yesterdayDate.toISOString().split('T')[0];
-			
-			if (mealDaysSet.has(yesterdayStr)) {
-				streak = 1;
-				
-				// Start checking from 2 days ago
-				let dayOffset = 2;
-				let checkingDate = new Date(currentDate);
-				checkingDate.setDate(currentDate.getDate() - dayOffset);
-				
-				while (true) {
-					const checkDateStr = checkingDate.toISOString().split('T')[0];
-					if (mealDaysSet.has(checkDateStr)) {
-						streak++;
-						dayOffset++;
-						checkingDate.setDate(currentDate.getDate() - dayOffset);
-					} else {
-						break;
-					}
+					break; // Break streak when a day is missed
 				}
 			}
 		}
 		
-		// Calculate max streak
-		let tempStreak = 0;
-		for (let i = 0; i < uniqueDates.length; i++) {
-			const currentDateObj = new Date(uniqueDates[i]);
+		// --- Calculate max streak ---
+		let maxStreak = 0;
+		let tempStreak = 1;
+		
+		// Since uniqueDates is sorted (oldest first), go through each date
+		for (let i = 1; i < uniqueDates.length; i++) {
+			const currentDate = new Date(uniqueDates[i]);
+			const prevDate = new Date(uniqueDates[i - 1]);
 			
-			if (i === 0) {
-				tempStreak = 1;
-				continue;
-			}
+			// Check if dates are consecutive (1 day apart)
+			const diffTime = Math.abs(currentDate.getTime() - prevDate.getTime());
+			const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 			
-			const prevDateObj = new Date(uniqueDates[i-1]);
-			const dayDiff = Math.abs(
-				(prevDateObj.getTime() - currentDateObj.getTime()) / (1000 * 60 * 60 * 24)
-			);
-			
-			if (dayDiff === 1) {
+			if (diffDays === 1) {
+				// Dates are consecutive, increase streak
 				tempStreak++;
 			} else {
-				// Reset streak if there's a gap
-				tempStreak = 1;
+				// Streak broken, check if it was the longest so far
+				maxStreak = Math.max(maxStreak, tempStreak);
+				tempStreak = 1; // Reset streak
 			}
-			
-			maxStreakCount = Math.max(maxStreakCount, tempStreak);
 		}
-
-		setCurrentStreak(streak);
-		setMaxStreak(Math.max(maxStreakCount, streak));
+		
+		// Check final streak
+		maxStreak = Math.max(maxStreak, tempStreak);
+		
+		// Update state with calculated streaks
+		setCurrentStreak(currentStreak);
+		setMaxStreak(Math.max(maxStreak, currentStreak)); // Max streak could be the current one
 	};
 
 	// --------------

@@ -23,7 +23,6 @@ export class MealtrackerStack extends cdk.Stack {
 
     // ********** Grant Permissions **********
 
-    ddb.mealsTable_prod.grantReadWriteData(lambda.meals_prod);
     ddb.mealsTable_dev.grantReadWriteData(lambda.meals_dev);
     ddb.mealsTable_prod.grantReadWriteData(lambda.meals_go);
 

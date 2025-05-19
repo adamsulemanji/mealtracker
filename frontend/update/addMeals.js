@@ -108,7 +108,7 @@ export const generateTestMeals = async (startDate, endDate, mealsPerDay = 3) => 
 
 // Example usage:
 const startDate = new Date('2025-01-01');
-const endDate = new Date('2025-03-27');
+const endDate = new Date('2025-05-18');
 generateTestMeals(startDate, endDate, 2)
   .then(result => console.log(`Generated ${result.count} test meals successfully`))
   .catch(err => console.error('Failed to generate test meals:', err));

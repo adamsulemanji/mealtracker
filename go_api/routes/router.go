@@ -32,7 +32,6 @@ func NewRouter() *Router {
 	r.HandleFunc("/meals", mealsController.CreateHandler).Methods(http.MethodPost)
 	r.HandleFunc("/meals/{id}", mealsController.UpdateHandler).Methods(http.MethodPut)
 	r.HandleFunc("/meals/{id}", mealsController.DestroyHandler).Methods(http.MethodDelete)
-	r.HandleFunc("/meals", mealsController.DestroyAllHandler).Methods(http.MethodDelete)
 	r.HandleFunc("/", mealsController.HelloHandler).Methods(http.MethodGet)
 	r.HandleFunc("/meals", corsOptionsHandler).Methods(http.MethodOptions)
 	r.HandleFunc("/meals/{id}", corsOptionsHandler).Methods(http.MethodOptions)

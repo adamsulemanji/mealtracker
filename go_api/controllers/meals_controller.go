@@ -90,12 +90,6 @@ func (c *MealsController) DestroyHandler(w http.ResponseWriter, r *http.Request)
 	writeResponse(w, resp)
 }
 
-// DestroyAllHandler removes all meals
-func (c *MealsController) DestroyAllHandler(w http.ResponseWriter, r *http.Request) {
-	resp, _ := c.DestroyAll(r.Context())
-	writeResponse(w, resp)
-}
-
 // Helper to write API Gateway response to HTTP response
 func writeResponse(w http.ResponseWriter, resp events.APIGatewayProxyResponse) {
 	for k, v := range resp.Headers {
@@ -227,6 +221,7 @@ func (c *MealsController) Destroy(ctx context.Context, mealID string) (events.AP
 		Message: "Meal deleted",
 	})
 }
+
 
 // NotFound returns a 404 response for non-existent routes
 func NotFound() (events.APIGatewayProxyResponse, error) {
