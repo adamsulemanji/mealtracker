@@ -14,6 +14,8 @@ import MealFilters from "@/components/page/MealFilters";
 import MealTable from "@/components/page/MealTable";
 import ChartComponent, { ChartView } from "@/components/page/ChartComponent";
 import Footer from "@/components/page/Footer";
+import StatsModal from "@/components/page/StatsModal";
+import StreakBadge from "@/components/page/StreakBadge";
 
 // Utility functions
 import {
@@ -48,6 +50,8 @@ export default function Home() {
 	const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
 	const [lookbackPeriod, setLookbackPeriod] = useState<number>(30); // Default to 30 days lookback
 	const [tagFilter, setTagFilter] = useState<string | null>(null);
+	const [currentStreak, setCurrentStreak] = useState<number>(0);
+	const [maxStreak, setMaxStreak] = useState<number>(0);
 
 	const apiURL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -78,6 +82,9 @@ export default function Home() {
 			const mealsData = response.data.items;
 			const sortedMeals = sortMeals(mealsData).reverse();
 			setMeals(sortedMeals);
+			
+			// Calculate streaks after fetching meals
+			calculateStreaks(mealsData);
 		} catch (error) {
 			console.error(error);
 			toast({
@@ -276,6 +283,111 @@ export default function Home() {
 		}
 	}, [chartView, lookbackPeriod]);
 
+	// Calculate streaks based on meal data
+	const calculateStreaks = (mealsData: MealForm[]) => {
+		if (!mealsData.length) {
+			setCurrentStreak(0);
+			setMaxStreak(0);
+			return;
+		}
+
+		// Get unique dates and sort them in descending order (newest first)
+		const uniqueDates = [...new Set(mealsData.map(meal => 
+			new Date(meal.date).toISOString().split('T')[0]
+		))].sort().reverse();
+
+		// Calculate current streak
+		let streak = 0;
+		let maxStreakCount = 0;
+		let currentDate = new Date();
+		
+		// Set time to midnight for consistent comparison
+		currentDate.setHours(0, 0, 0, 0);
+		
+		// Calculate days since epoch for easier date arithmetic
+		const currentDateEpoch = Math.floor(currentDate.getTime() / (24 * 60 * 60 * 1000));
+
+		// Build a set of days that have meals logged for faster lookup
+		const mealDaysSet = new Set(uniqueDates);
+		
+		// Check if there's a log for today
+		const todayStr = currentDate.toISOString().split('T')[0];
+		let hasTodayLog = mealDaysSet.has(todayStr);
+		
+		if (hasTodayLog) {
+			streak = 1;
+			
+			// Start checking from yesterday
+			let dayOffset = 1;
+			let checkingDate = new Date(currentDate);
+			checkingDate.setDate(currentDate.getDate() - dayOffset);
+			
+			while (true) {
+				const checkDateStr = checkingDate.toISOString().split('T')[0];
+				if (mealDaysSet.has(checkDateStr)) {
+					streak++;
+					dayOffset++;
+					checkingDate.setDate(currentDate.getDate() - dayOffset);
+				} else {
+					break;
+				}
+			}
+		} else {
+			// If no log today, check if there was one yesterday to continue streak
+			const yesterdayDate = new Date(currentDate);
+			yesterdayDate.setDate(currentDate.getDate() - 1);
+			const yesterdayStr = yesterdayDate.toISOString().split('T')[0];
+			
+			if (mealDaysSet.has(yesterdayStr)) {
+				streak = 1;
+				
+				// Start checking from 2 days ago
+				let dayOffset = 2;
+				let checkingDate = new Date(currentDate);
+				checkingDate.setDate(currentDate.getDate() - dayOffset);
+				
+				while (true) {
+					const checkDateStr = checkingDate.toISOString().split('T')[0];
+					if (mealDaysSet.has(checkDateStr)) {
+						streak++;
+						dayOffset++;
+						checkingDate.setDate(currentDate.getDate() - dayOffset);
+					} else {
+						break;
+					}
+				}
+			}
+		}
+		
+		// Calculate max streak
+		let tempStreak = 0;
+		for (let i = 0; i < uniqueDates.length; i++) {
+			const currentDateObj = new Date(uniqueDates[i]);
+			
+			if (i === 0) {
+				tempStreak = 1;
+				continue;
+			}
+			
+			const prevDateObj = new Date(uniqueDates[i-1]);
+			const dayDiff = Math.abs(
+				(prevDateObj.getTime() - currentDateObj.getTime()) / (1000 * 60 * 60 * 24)
+			);
+			
+			if (dayDiff === 1) {
+				tempStreak++;
+			} else {
+				// Reset streak if there's a gap
+				tempStreak = 1;
+			}
+			
+			maxStreakCount = Math.max(maxStreakCount, tempStreak);
+		}
+
+		setCurrentStreak(streak);
+		setMaxStreak(Math.max(maxStreakCount, streak));
+	};
+
 	// --------------
 	// Render
 	// --------------
@@ -286,6 +398,10 @@ export default function Home() {
 				{/* Header Section */}
 				<div className="w-full flex justify-between items-start">
 					<GreetingHeader phrase={phrase} />
+					<div className="flex items-center gap-2">
+						<StreakBadge currentStreak={currentStreak} maxStreak={maxStreak} />
+						<StatsModal meals={meals} currentStreak={currentStreak} maxStreak={maxStreak} />
+					</div>
 				</div>
 
 				<Separator className="dark:bg-gray-700 my-2" />
