@@ -81,8 +81,8 @@ export default function Home() {
 			const response = await axios.get(`${apiURL}/meals`);
 			
 			// Add defensive check for response structure
-			if (!response.data) {
-				console.error("API response has no data:", response);
+			if (!response.data || !response.data.success) {
+				console.error("API response failed or has invalid format:", response);
 				toast({
 					title: "Error",
 					description: "Invalid API response format",
@@ -91,22 +91,12 @@ export default function Home() {
 				return;
 			}
 			
-			// Log the response structure in development
-			if (process.env.NODE_ENV === 'development') {
-				console.log("API Response structure:", response.data);
-			}
+			// All APIs now use the same format: { success: true, items: [...] }
+			const mealsData = response.data.items;
 			
-			// Check for both possible structures (.items or direct array)
-			let mealsData = response.data.items || response.data.Items;
-			
-			// If neither exists, try to use the response data directly if it's an array
-			if (!mealsData && Array.isArray(response.data)) {
-				mealsData = response.data;
-			}
-			
-			// Final validation
+			// Validate response data
 			if (!Array.isArray(mealsData)) {
-				console.error("Could not find meals array in API response", response.data);
+				console.error("Expected array of meals but got:", mealsData);
 				toast({
 					title: "Error",
 					description: "Invalid meals data format from API",

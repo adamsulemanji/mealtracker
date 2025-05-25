@@ -86,7 +86,14 @@ function MealFormModal({
       } else {
         // Create a new meal
         const response = await axios.post(`${apiURL}/meals`, mealData);
-        const newMealData = { ...mealData, mealID: response.data.items.mealID };
+        
+        // Standardized response format: { success: true, item: {...} }
+        if (!response.data || !response.data.success || !response.data.item) {
+          console.error("Unexpected API response format:", response.data);
+          throw new Error("Invalid response format from API");
+        }
+        
+        const newMealData = { ...mealData, mealID: response.data.item.mealID };
         onSave(newMealData);
       }
 
@@ -95,6 +102,12 @@ function MealFormModal({
       handleOpenChange(false);
     } catch (error) {
       console.error("Failed to create/update meal:", error);
+      // Show user-friendly error message
+      if (error instanceof Error) {
+        alert(`Failed to save meal: ${error.message}`);
+      } else {
+        alert("Failed to save meal. Please check your connection and try again.");
+      }
     }
   };
 

@@ -28,8 +28,7 @@ app.add_middleware(
 
 handler = Mangum(app)
 
-# table_name = os.environ.get("TABLE_NAME", "MyTable")
-table_name = "MealsTable_prod"
+table_name = os.environ.get("TABLE_NAME", "MyTable")
 dynamodb = boto3.resource("dynamodb")
 table = dynamodb.Table(table_name)
 
@@ -47,7 +46,7 @@ class MealInfo(BaseModel):
 
 @app.get("/")
 def read_root():
-    return {"status": True, "items": {"Hello": "World"}}
+    return {"success": True, "message": "Hello, World!"}
 
 @app.get("/meals/{mealID}")
 def get_item(mealID: str):
@@ -55,7 +54,7 @@ def get_item(mealID: str):
     item = response.get("Item")
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
-    return {"status": True, "items": item}
+    return {"success": True, "item": item}
 
 @app.post("/meals")
 def create_item(item: MealInfo):
@@ -64,7 +63,7 @@ def create_item(item: MealInfo):
     item_data = item.dict()
     item_data["date"] = item_data["date"].isoformat()
     table.put_item(Item=item_data)
-    return {"status": True, "items": item_data}
+    return {"success": True, "item": item_data}
 
 @app.put("/meals/{mealID}")
 def update_item(mealID: str, item: MealInfo):
@@ -91,7 +90,7 @@ def update_item(mealID: str, item: MealInfo):
     )
     item_data = item.dict()
     item_data["date"] = updated_date
-    return {"status": True, "items": item_data}
+    return {"success": True, "item": item_data}
 
 @app.delete("/meals/{mealID}")
 def delete_item(mealID: str):
@@ -99,7 +98,7 @@ def delete_item(mealID: str):
     if "Item" not in response:
         raise HTTPException(status_code=404, detail="Item not found")
     table.delete_item(Key={"mealID": mealID})
-    return {"status": True, "items": {"mealID": mealID, "message": f"Item with ID '{mealID}' deleted"}}
+    return {"success": True, "message": "Meal deleted"}
 
 @app.get("/meals", response_model=Dict[str, Any])
 def get_all_items():
@@ -121,5 +120,5 @@ def get_all_items():
 
         meal_infos.append(MealInfo(**i).dict())
         meal_infos[-1]["date"] = meal_infos[-1]["date"].isoformat()
-    return {"status": True, "items": meal_infos}
+    return {"success": True, "items": meal_infos}
 
