@@ -9,13 +9,14 @@ import * as route53 from "aws-cdk-lib/aws-route53";
 import * as route53targets from "aws-cdk-lib/aws-route53-targets";
 import * as acm from "aws-cdk-lib/aws-certificatemanager";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
+import { CONFIG } from "./config";
 
 export class FrontendConstruct extends Construct {
 	constructor(app: Construct, id: string, apis: apigateway.LambdaRestApi[]) {
 		super(app, id);
 
-		const domainName = "adamsulemanji.com";
-		const subDomain = "mealtracker";
+		const domainName = CONFIG.domainName;
+		const subDomain = CONFIG.subDomain;
 
 		// ********** Frontend Bucket **********
 		const myBucket = new s3.Bucket(this, `myBucket-${subDomain}`, {
@@ -56,6 +57,36 @@ export class FrontendConstruct extends Construct {
 			}
 		);
 
+		// ********** Response Headers Policy **********
+		const responseHeadersPolicy = new cloudfront.ResponseHeadersPolicy(
+			this,
+			`ResponseHeadersPolicy-${subDomain}`,
+			{
+				securityHeadersBehavior: {
+					strictTransportSecurity: {
+						accessControlMaxAge: cdk.Duration.days(365),
+						includeSubdomains: true,
+						override: true,
+					},
+					contentTypeOptions: { override: true },
+					frameOptions: {
+						frameOption: cloudfront.HeadersFrameOption.DENY,
+						override: true,
+					},
+					xssProtection: {
+						protection: true,
+						modeBlock: true,
+						override: true,
+					},
+					referrerPolicy: {
+						referrerPolicy:
+							cloudfront.HeadersReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN,
+						override: true,
+					},
+				},
+			}
+		);
+
 		// ********** CloudFront Distribution **********
 		const s3Origin = new origin.S3Origin(myBucket);
 
@@ -68,6 +99,7 @@ export class FrontendConstruct extends Construct {
 					viewerProtocolPolicy:
 						cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
 					allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
+					responseHeadersPolicy: responseHeadersPolicy,
 				},
 				defaultRootObject: "index.html",
 				domainNames: [`${subDomain}.${domainName}`],
@@ -122,7 +154,7 @@ export class FrontendConstruct extends Construct {
 
 
         // ********** APIGateway Production **********
-        const apiSubDomain = "api.meals";
+        const apiSubDomain = CONFIG.apiSubDomain;
         const apiDomainName = `${apiSubDomain}.${domainName}`;
 
         const certificate_api = new acm.Certificate(

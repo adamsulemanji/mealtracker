@@ -100,6 +100,20 @@ def delete_item(mealID: str):
     table.delete_item(Key={"mealID": mealID})
     return {"success": True, "message": "Meal deleted"}
 
+
+@app.delete("/meals")
+def delete_all_items():
+    response = table.scan()
+    items = response.get("Items", [])
+    if not items:
+        return {"success": True, "message": "No items to delete"}
+    
+    with table.batch_writer() as batch:
+        for item in items:
+            batch.delete_item(Key={"mealID": item["mealID"]})
+    
+    return {"success": True, "message": "All meals deleted"}
+
 @app.get("/meals", response_model=Dict[str, Any])
 def get_all_items():
     response = table.scan()

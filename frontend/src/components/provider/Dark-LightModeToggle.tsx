@@ -24,7 +24,7 @@ export function ModeToggle() {
     if (darkMode) {
       document.documentElement.classList.add("dark");
     } else {
-      document.documentElement.classList.remove("dark");
+      document.documentElement.classList.add("dark");
     }
   }, [darkMode]);
 

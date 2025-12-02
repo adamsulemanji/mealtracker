@@ -28,7 +28,8 @@
     "removeComments": true,
   },
   "include": [
-    "src/**/*"
+    "bin/**/*",
+    "lib/**/*"
   ],
   "exclude": [
     "node_modules",

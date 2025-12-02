@@ -16,7 +16,7 @@ export class MealtrackerStack extends cdk.Stack {
     const lambda = new LambdaConstruct(this, 'LambdaConstruct', [ddb.mealsTable_prod, ddb.mealsTable_dev]);
 
     // ********** API Gateway **********
-    const api = new ApiGatewayConstruct(this, 'ApiGatewayConstruct', [lambda.meals_prod, lambda.meals_dev, lambda.meals_go]);
+    const api = new ApiGatewayConstruct(this, 'ApiGatewayConstruct', [lambda.meals_dev, lambda.meals_go]);
 
     // ********** Frontend **********
     new FrontendConstruct(this, 'FrontendConstruct', [api.api_prod, api.api_dev]);

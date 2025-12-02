@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { MealForm } from "@/interfaces/MealForm";
 import { MealFormProps } from "@/interfaces/MealFormProps";
@@ -48,21 +48,21 @@ function MealFormModal({
   isOpen, 
   onOpenChange 
 }: ExtendedMealFormProps) {
-  const [open, setOpen] = React.useState(isOpen || false);
-  const [mealData, setMealData] = React.useState<MealForm>(
+  const [open, setOpen] = useState(isOpen || false);
+  const [mealData, setMealData] = useState<MealForm>(
     meal ?? defaultMealData
   );
 
   const apiURL = process.env.NEXT_PUBLIC_API_URL;
 
-  React.useEffect(() => {
+  useEffect(() => {
     // Update open state if controlled externally
     if (isOpen !== undefined) {
       setOpen(isOpen);
     }
   }, [isOpen]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setMealData(meal ?? defaultMealData);
   }, [meal]);
 

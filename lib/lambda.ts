@@ -5,7 +5,6 @@ import * as path from 'path';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 
 export class LambdaConstruct extends Construct {
-  public readonly meals_prod: lambda.Function;
   public readonly meals_dev: lambda.Function
   public readonly meals_go: lambda.Function
 
@@ -38,6 +37,7 @@ export class LambdaConstruct extends Construct {
           TABLE_NAME: mealsTableNameDev,
         },
         architecture: lambda.Architecture.X86_64,
+        tracing: lambda.Tracing.ACTIVE,
       }
     );
 
@@ -54,6 +54,7 @@ export class LambdaConstruct extends Construct {
           TABLE_NAME: mealsTableName,
         },
         architecture: lambda.Architecture.X86_64,
+        tracing: lambda.Tracing.ACTIVE,
       }
     );
 

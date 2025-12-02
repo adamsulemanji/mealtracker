@@ -10,17 +10,29 @@ export class ApiGatewayConstruct extends Construct {
 		super(scope, id);
 
 		this.api_prod = new apigateway.LambdaRestApi(this, "MealsAPIG-prod", {
-			handler: lambdas[2],
-			proxy: true,
-			description:
-				"APIGateway Proxy service for Meals API for Production",
-		});
-
-		this.api_dev = new apigateway.LambdaRestApi(this, "MealsAPIG-dev", {
 			handler: lambdas[1],
 			proxy: true,
 			description:
+				"APIGateway Proxy service for Meals API for Production",
+			deployOptions: {
+				stageName: "prod",
+				tracingEnabled: true,
+				throttlingRateLimit: 100,
+				throttlingBurstLimit: 200,
+			},
+		});
+
+		this.api_dev = new apigateway.LambdaRestApi(this, "MealsAPIG-dev", {
+			handler: lambdas[0],
+			proxy: true,
+			description:
 				"APIGateway Proxy service for Meals API for Development",
+			deployOptions: {
+				stageName: "dev",
+				tracingEnabled: true,
+				throttlingRateLimit: 10,
+				throttlingBurstLimit: 20,
+			},
 		});
 	}
 }
