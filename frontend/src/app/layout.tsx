@@ -3,7 +3,7 @@ import localFont from "next/font/local";
 import "@/utils/styles/globals.css";
 import { ThemeProvider } from "@/components/provider/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
-import { Snowfall } from "@/components/ui/snowfall";
+import PasswordGate from "@/components/page/PasswordGate"
 
 const geistSans = localFont({
   src: "../utils/fonts/GeistVF.woff",
@@ -17,7 +17,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Nikki",
+  title: "Meal Tracker",
   description: "A website to track your meals by Adam",
 };
 
@@ -37,9 +37,10 @@ export default function RootLayout({
           enableSystem={false}
           forcedTheme="dark"
         >
-          <Snowfall />
-          {children}
-          <Toaster />
+          <PasswordGate>
+            {children}
+            <Toaster />
+          </PasswordGate>
         </ThemeProvider>
       </body>
     </html>

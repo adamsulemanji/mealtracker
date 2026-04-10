@@ -4,7 +4,7 @@ const path = require('path');
 
 // Load the CSV file
 const csvFilePath = path.resolve(__dirname, 'results-3.csv');
-const apiEndpoint = 'https://api.meals.adamsulemanji.com/meals';
+const apiEndpoint = 'http://localhost:8000/meals';
 
 // Helper function to parse CSV data
 function parseCSV(csvData) {

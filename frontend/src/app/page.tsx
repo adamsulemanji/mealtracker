@@ -5,8 +5,10 @@ import { useToast } from "@/hooks/use-toast";
 import { MealForm } from "@/interfaces/MealForm";
 import { phrases } from "@/utils/misc/phrases";
 import MealFormModal from "@/components/page/MealFormModal";
-import { Separator } from "@/components/ui/separator";
 import { type ChartConfig } from "@/components/ui/chart";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Plus, Loader2 } from "lucide-react";
 
 // Page components
 import GreetingHeader from "@/components/page/GreetingHeader";
@@ -16,6 +18,7 @@ import ChartComponent, { ChartView } from "@/components/page/ChartComponent";
 import Footer from "@/components/page/Footer";
 import StatsModal from "@/components/page/StatsModal";
 import StreakBadge from "@/components/page/StreakBadge";
+import { ModeToggle } from "@/components/provider/Dark-LightModeToggle";
 
 // Utility functions
 import {
@@ -23,7 +26,7 @@ import {
 	getCurrentMonthData,
 	getAllTimeDataByMonth,
 	getAllTimeDatabyDay,
-	rollingEatingOutPercentage
+	rollingEatingOutPercentage,
 } from "@/utils/ChartUtils";
 
 const chartConfig = {
@@ -48,7 +51,7 @@ export default function Home() {
 	const [searchQuery, setSearchQuery] = useState<string>("");
 	const [editingMeal, setEditingMeal] = useState<MealForm | null>(null);
 	const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
-	const [lookbackPeriod, setLookbackPeriod] = useState<number>(30); // Default to 30 days lookback
+	const [lookbackPeriod, setLookbackPeriod] = useState<number>(30);
 	const [tagFilter, setTagFilter] = useState<string | null>(null);
 	const [currentStreak, setCurrentStreak] = useState<number>(0);
 	const [maxStreak, setMaxStreak] = useState<number>(0);
@@ -60,12 +63,8 @@ export default function Home() {
 		return [...meals].sort((a, b) => {
 			const dateA = new Date(a.date).getTime();
 			const dateB = new Date(b.date).getTime();
-
 			if (dateA === dateB) {
-				return (
-					mealOrder.indexOf(a.mealType) -
-					mealOrder.indexOf(b.mealType)
-				);
+				return mealOrder.indexOf(a.mealType) - mealOrder.indexOf(b.mealType);
 			}
 			return dateA - dateB;
 		});
@@ -79,8 +78,7 @@ export default function Home() {
 		try {
 			setIsLoading(true);
 			const response = await axios.get(`${apiURL}/meals`);
-			
-			// Add defensive check for response structure
+
 			if (!response.data || !response.data.success) {
 				console.error("API response failed or has invalid format:", response);
 				toast({
@@ -90,11 +88,9 @@ export default function Home() {
 				});
 				return;
 			}
-			
-			// All APIs now use the same format: { success: true, items: [...] }
+
 			const mealsData = response.data.items;
-			
-			// Validate response data
+
 			if (!Array.isArray(mealsData)) {
 				console.error("Expected array of meals but got:", mealsData);
 				toast({
@@ -104,17 +100,14 @@ export default function Home() {
 				});
 				return;
 			}
-			
-			// Ensure tags is always an array for each meal
-			const normalizedMeals = mealsData.map(meal => ({
+
+			const normalizedMeals = mealsData.map((meal) => ({
 				...meal,
-				tags: Array.isArray(meal.tags) ? meal.tags : []
+				tags: Array.isArray(meal.tags) ? meal.tags : [],
 			}));
-			
+
 			const sortedMeals = sortMeals(normalizedMeals).reverse();
 			setMeals(sortedMeals);
-			
-			// Calculate streaks after fetching meals
 			calculateStreaks(normalizedMeals);
 		} catch (error) {
 			console.error(error);
@@ -144,9 +137,7 @@ export default function Home() {
 
 	const handleSaveMeal = (updatedMeal: MealForm) => {
 		setMeals((prevMeals) => {
-			const exists = prevMeals.some(
-				(m) => m.mealID === updatedMeal.mealID
-			);
+			const exists = prevMeals.some((m) => m.mealID === updatedMeal.mealID);
 			let newMeals: MealForm[];
 			if (exists) {
 				newMeals = prevMeals.map((m) =>
@@ -198,23 +189,21 @@ export default function Home() {
 		fetchMeals();
 		setPhrase(getRandomPhrase());
 
-		// Add keyboard shortcut for new meal
 		const handleKeyDown = (event: KeyboardEvent) => {
-			// Check if 'n' or 'N' is pressed
-			if ((event.key === 'n' || event.key === 'N') && 
-				// Make sure no input elements are focused
-				!['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName || '')) {
-				event.preventDefault(); // Prevent the 'n' key from being entered in the form
+			if (
+				(event.key === "n" || event.key === "N") &&
+				!["INPUT", "TEXTAREA", "SELECT"].includes(
+					document.activeElement?.tagName || ""
+				)
+			) {
+				event.preventDefault();
 				handleAddMeal();
 			}
 		};
 
-		// Add event listener
-		window.addEventListener('keydown', handleKeyDown);
-
-		// Clean up event listener on component unmount
+		window.addEventListener("keydown", handleKeyDown);
 		return () => {
-			window.removeEventListener('keydown', handleKeyDown);
+			window.removeEventListener("keydown", handleKeyDown);
 		};
 	}, []);
 
@@ -224,42 +213,34 @@ export default function Home() {
 
 	const filteredMeals = useMemo(() => {
 		return meals.filter((m) => {
-			// Apply type filter
 			const passesMealType = mealTypeFilter ? m.mealType === mealTypeFilter : true;
-			
-			// Apply eating out filter
-			const passesEatingOut = eatingOutFilter !== null ? m.eatingOut === eatingOutFilter : true;
-			
-			// Apply tag filter
-			const passesTagFilter = tagFilter ? (Array.isArray(m.tags) && m.tags.includes(tagFilter)) : true;
-			
-			// Apply search query
+			const passesEatingOut =
+				eatingOutFilter !== null ? m.eatingOut === eatingOutFilter : true;
+			const passesTagFilter = tagFilter
+				? Array.isArray(m.tags) && m.tags.includes(tagFilter)
+				: true;
+
 			const query = searchQuery.toLowerCase().trim();
 			if (!query) {
 				return passesMealType && passesEatingOut && passesTagFilter;
 			}
-			
-			// Check if the query matches any of the meal properties
+
 			const mealDate = new Date(m.date).toLocaleDateString().toLowerCase();
-			const isEatingOutMatch = 
-				query === "out" ? m.eatingOut : 
-				query === "in" ? !m.eatingOut : false;
-			
-			// Check if query matches any tags
-			const hasMatchingTag = m.tags && m.tags.some(tag => 
-				tag.toLowerCase().includes(query)
-			);
-			
+			const isEatingOutMatch =
+				query === "out" ? m.eatingOut : query === "in" ? !m.eatingOut : false;
+			const hasMatchingTag =
+				m.tags && m.tags.some((tag) => tag.toLowerCase().includes(query));
+
 			return (
-				passesMealType && 
-				passesEatingOut && 
+				passesMealType &&
+				passesEatingOut &&
 				passesTagFilter &&
 				(m.mealName.toLowerCase().includes(query) ||
-				m.mealType.toLowerCase().includes(query) ||
-				mealDate.includes(query) ||
-				(m.note && m.note.toLowerCase().includes(query)) ||
-				hasMatchingTag ||
-				isEatingOutMatch)
+					m.mealType.toLowerCase().includes(query) ||
+					mealDate.includes(query) ||
+					(m.note && m.note.toLowerCase().includes(query)) ||
+					hasMatchingTag ||
+					isEatingOutMatch)
 			);
 		});
 	}, [meals, mealTypeFilter, eatingOutFilter, tagFilter, searchQuery]);
@@ -286,22 +267,20 @@ export default function Home() {
 	}, [filteredMeals, chartView, lookbackPeriod]);
 
 	const chartTitle = useMemo(() => {
-		const CurrentMonth = new Date().toLocaleString("default", {
-			month: "long",
-		});
+		const CurrentMonth = new Date().toLocaleString("default", { month: "long" });
 		switch (chartView) {
 			case "last7Days":
 				return "Last 7 Days";
 			case "currentMonth":
-				return "Current Month - " + CurrentMonth;
+				return CurrentMonth;
 			case "allTimebyMonth":
-				return "All Time By Month";
+				return "All Time by Month";
 			case "allTimebyDay":
-				return "All Time By Day";
+				return "All Time by Day";
 			case "rollingEatingOutPercentage":
-				return lookbackPeriod > 0 
-					? `Rolling Eating Out Percentage (${lookbackPeriod} Day${lookbackPeriod !== 1 ? 's' : ''})` 
-					: "Rolling Eating Out Percentage (All Time)";
+				return lookbackPeriod > 0
+					? `Rolling ${lookbackPeriod}d Eating Out %`
+					: "Rolling Eating Out %";
 			default:
 				return "";
 		}
@@ -315,83 +294,64 @@ export default function Home() {
 			return;
 		}
 
-		// Get all dates with meal logs and normalize them to YYYY-MM-DD format
-		const mealDates = mealsData.map(meal => {
+		const mealDates = mealsData.map((meal) => {
 			const date = new Date(meal.date);
-			return date.toISOString().split('T')[0]; // YYYY-MM-DD format
+			return date.toISOString().split("T")[0];
 		});
-		
-		// Create a set of unique dates
+
 		const uniqueDatesSet = new Set(mealDates);
-		
-		// Convert to array and sort (oldest to newest)
 		const uniqueDates = [...uniqueDatesSet].sort();
-		
-		// Get today and yesterday's dates in YYYY-MM-DD format
+
 		const today = new Date();
 		today.setHours(0, 0, 0, 0);
-		const todayStr = today.toISOString().split('T')[0];
-		
+		const todayStr = today.toISOString().split("T")[0];
+
 		const yesterday = new Date(today);
 		yesterday.setDate(today.getDate() - 1);
-		const yesterdayStr = yesterday.toISOString().split('T')[0];
+		const yesterdayStr = yesterday.toISOString().split("T")[0];
 
-		// --- Calculate current streak ---
 		let currentStreak = 0;
-		
-		// Check if there's an entry for today or yesterday to start the streak count
 		const hasToday = uniqueDatesSet.has(todayStr);
 		const hasYesterday = uniqueDatesSet.has(yesterdayStr);
-		
+
 		if (hasToday || hasYesterday) {
-			// Start counting from today or yesterday
 			const startDate = hasToday ? today : yesterday;
-			currentStreak = 1; // Start with 1 for today/yesterday
-			
-			// Count back through previous days
+			currentStreak = 1;
+
 			let checkDate = new Date(startDate);
-			checkDate.setDate(checkDate.getDate() - (hasToday ? 1 : 0)); // If starting from today, first check is yesterday
-			
+			checkDate.setDate(checkDate.getDate() - (hasToday ? 1 : 0));
+
 			while (true) {
-				const dateStr = checkDate.toISOString().split('T')[0];
+				const dateStr = checkDate.toISOString().split("T")[0];
 				if (uniqueDatesSet.has(dateStr)) {
 					currentStreak++;
-					checkDate.setDate(checkDate.getDate() - 1); // Move to previous day
+					checkDate.setDate(checkDate.getDate() - 1);
 				} else {
-					break; // Break streak when a day is missed
+					break;
 				}
 			}
 		}
-		
-		// --- Calculate max streak ---
+
 		let maxStreak = 0;
 		let tempStreak = 1;
-		
-		// Since uniqueDates is sorted (oldest first), go through each date
+
 		for (let i = 1; i < uniqueDates.length; i++) {
 			const currentDate = new Date(uniqueDates[i]);
 			const prevDate = new Date(uniqueDates[i - 1]);
-			
-			// Check if dates are consecutive (1 day apart)
 			const diffTime = Math.abs(currentDate.getTime() - prevDate.getTime());
 			const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-			
+
 			if (diffDays === 1) {
-				// Dates are consecutive, increase streak
 				tempStreak++;
 			} else {
-				// Streak broken, check if it was the longest so far
 				maxStreak = Math.max(maxStreak, tempStreak);
-				tempStreak = 1; // Reset streak
+				tempStreak = 1;
 			}
 		}
-		
-		// Check final streak
+
 		maxStreak = Math.max(maxStreak, tempStreak);
-		
-		// Update state with calculated streaks
 		setCurrentStreak(currentStreak);
-		setMaxStreak(Math.max(maxStreak, currentStreak)); // Max streak could be the current one
+		setMaxStreak(Math.max(maxStreak, currentStreak));
 	};
 
 	// --------------
@@ -399,80 +359,108 @@ export default function Home() {
 	// --------------
 
 	return (
-		<div className="flex flex-col min-h-screen p-4 sm:p-6 md:p-8 w-full">
-			<main className="flex flex-col flex-1 gap-4 sm:gap-6 md:gap-8 items-center w-full max-w-7xl mx-auto">
-				{/* Header Section */}
-				<div className="w-full flex justify-between items-start">
-					<GreetingHeader phrase={phrase} />
-					<div className="flex items-center gap-2">
-						<StreakBadge currentStreak={currentStreak} maxStreak={maxStreak} />
-						<StatsModal meals={meals} currentStreak={currentStreak} maxStreak={maxStreak} />
+		<div className="min-h-screen flex flex-col bg-background">
+			{/* Sticky top navigation */}
+			<header className="sticky top-0 z-40 border-b bg-background/90 backdrop-blur-sm">
+				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+					<div className="flex items-center justify-between h-16 gap-4">
+						<GreetingHeader phrase={phrase} />
+						<div className="flex items-center gap-2 shrink-0">
+							<StreakBadge
+								currentStreak={currentStreak}
+								maxStreak={maxStreak}
+							/>
+							<StatsModal
+								meals={meals}
+								currentStreak={currentStreak}
+								maxStreak={maxStreak}
+							/>
+							<Button size="sm" onClick={handleAddMeal} className="gap-1.5">
+								<Plus className="h-4 w-4" />
+								<span className="hidden sm:inline">Add Meal</span>
+								<span className="sm:hidden">Add</span>
+							</Button>
+							<ModeToggle />
+						</div>
 					</div>
 				</div>
+			</header>
 
-				<Separator className="dark:bg-gray-700 my-2" />
-
-				{/* Main Content */}
+			{/* Main content */}
+			<main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6">
 				{isLoading ? (
-					<div className="flex items-center justify-center w-full py-12">
-						<div className="text-center text-gray-500">
-							Loading meals...
-						</div>
+					<div className="flex items-center justify-center py-24 gap-2 text-muted-foreground">
+						<Loader2 className="h-4 w-4 animate-spin" />
+						<span className="text-sm">Loading meals…</span>
 					</div>
 				) : meals.length === 0 ? (
-					<div className="flex items-center justify-center w-full py-12">
-						<div className="text-center text-gray-500">
-							No meals available
-						</div>
+					<div className="flex flex-col items-center justify-center py-24 gap-4">
+						<p className="text-muted-foreground text-sm">No meals logged yet.</p>
+						<Button onClick={handleAddMeal} className="gap-1.5">
+							<Plus className="h-4 w-4" /> Log your first meal
+						</Button>
 					</div>
 				) : (
-					<div className="flex flex-col w-full gap-6 md:gap-8">
-						
+					<div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+						{/* Chart card */}
+						<Card>
+							<CardHeader className="pb-2">
+								<CardTitle className="text-base font-semibold">
+									Meal Activity —{" "}
+									<span className="text-muted-foreground font-normal">
+										{chartTitle}
+									</span>
+								</CardTitle>
+							</CardHeader>
+							<CardContent className="pt-0">
+								<ChartComponent
+									chartData={chartData}
+									chartTitle={chartTitle}
+									chartView={chartView}
+									setChartView={setChartView}
+									lookbackPeriod={lookbackPeriod}
+									setLookbackPeriod={setLookbackPeriod}
+									chartConfig={chartConfig}
+								/>
+							</CardContent>
+						</Card>
 
-						{/* Chart and Table Section - Side by side on larger screens */}
-						<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-							{/* Chart Section */}
-							<ChartComponent
-								chartData={chartData}
-								chartTitle={chartTitle}
-								chartView={chartView}
-								setChartView={setChartView}
-								lookbackPeriod={lookbackPeriod}
-								setLookbackPeriod={setLookbackPeriod}
-								chartConfig={chartConfig}
-							/>
-
-							{/* Table Section */}
-							<MealTable
-								meals={filteredMeals}
-								onRowClick={handleRowClick}
-								getShortenedDayOfWeek={getShortenedDayOfWeek}
-								onSave={handleSaveMeal}
-								onDelete={deleteMeal}
-							/>							
-						</div>
-						{/* Filters and Controls */}
-						<MealFilters
-								searchQuery={searchQuery}
-								setSearchQuery={setSearchQuery}
-								mealTypeFilter={mealTypeFilter}
-								setMealTypeFilter={setMealTypeFilter}
-								eatingOutFilter={eatingOutFilter}
-								setEatingOutFilter={setEatingOutFilter}
-								tagFilter={tagFilter}
-								setTagFilter={setTagFilter}
-								meals={meals}
-								onAddMeal={handleAddMeal}
-							/>
+						{/* History card */}
+						<Card>
+							<CardHeader className="pb-3">
+								<CardTitle className="text-base font-semibold">
+									Meal History
+								</CardTitle>
+								<MealFilters
+									searchQuery={searchQuery}
+									setSearchQuery={setSearchQuery}
+									mealTypeFilter={mealTypeFilter}
+									setMealTypeFilter={setMealTypeFilter}
+									eatingOutFilter={eatingOutFilter}
+									setEatingOutFilter={setEatingOutFilter}
+									tagFilter={tagFilter}
+									setTagFilter={setTagFilter}
+									meals={meals}
+								/>
+							</CardHeader>
+							<CardContent className="p-0 pb-0">
+								<MealTable
+									meals={filteredMeals}
+									onRowClick={handleRowClick}
+									getShortenedDayOfWeek={getShortenedDayOfWeek}
+									onSave={handleSaveMeal}
+									onDelete={deleteMeal}
+								/>
+							</CardContent>
+						</Card>
 					</div>
 				)}
 			</main>
 
 			<Footer />
 
-			{/* Edit Modal that opens when clicking on a row or adding a new meal */}
 			{isEditModalOpen && (
-				<MealFormModal 
+				<MealFormModal
 					meal={editingMeal || undefined}
 					onSave={handleSaveMeal}
 					onDelete={deleteMeal}

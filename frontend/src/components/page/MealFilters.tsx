@@ -9,9 +9,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Search, X, FilterIcon, ChevronDown } from "lucide-react";
+import { Search, X, ChevronDown } from "lucide-react";
 import { MealForm } from "@/interfaces/MealForm";
-import { ModeToggle } from "@/components/provider/Dark-LightModeToggle";
 
 interface MealFiltersProps {
   searchQuery: string;
@@ -23,7 +22,6 @@ interface MealFiltersProps {
   tagFilter: string | null;
   setTagFilter: (value: string | null) => void;
   meals: MealForm[];
-  onAddMeal: () => void;
 }
 
 const MealFilters: React.FC<MealFiltersProps> = ({
@@ -36,137 +34,133 @@ const MealFilters: React.FC<MealFiltersProps> = ({
   tagFilter,
   setTagFilter,
   meals,
-  onAddMeal,
 }) => {
+  const uniqueTags = Array.from(new Set(meals.flatMap((m) => m.tags || [])));
+  const hasActiveFilters =
+    mealTypeFilter !== null || eatingOutFilter !== null || tagFilter !== null;
+
   return (
-    <div className="w-full space-y-4">
-      {/* Search Bar */}
+    <div className="space-y-2">
+      {/* Search */}
       <div className="relative">
         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
         <Input
           type="search"
-          placeholder="Search meals by name, type, date, tags, or 'out'/'in'..."
-          className="pl-9 w-full"
+          placeholder="Search meals..."
+          className="pl-9 h-9 text-sm"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
       </div>
 
-      {/* Filter Badges */}
-      {(mealTypeFilter !== null || eatingOutFilter !== null || tagFilter !== null) && (
-        <div className="flex flex-wrap gap-2 items-center">
-          <span className="text-sm text-muted-foreground">Active Filters:</span>
-          {mealTypeFilter && (
-            <Badge variant="secondary" className="flex items-center gap-1">
-              {mealTypeFilter}
-              <X 
-                size={14} 
-                className="cursor-pointer ml-1" 
-                onClick={() => setMealTypeFilter(null)} 
-              />
-            </Badge>
-          )}
-          {eatingOutFilter !== null && (
-            <Badge variant="secondary" className="flex items-center gap-1">
-              {eatingOutFilter ? "Eating Out" : "Eating In"}
-              <X 
-                size={14} 
-                className="cursor-pointer ml-1" 
-                onClick={() => setEatingOutFilter(null)} 
-              />
-            </Badge>
-          )}
-          {tagFilter && (
-            <Badge variant="secondary" className="flex items-center gap-1">
-              {tagFilter}
-              <X 
-                size={14} 
-                className="cursor-pointer ml-1" 
-                onClick={() => setTagFilter(null)} 
-              />
-            </Badge>
-          )}
-        </div>
-      )}
+      {/* Filter dropdowns */}
+      <div className="flex flex-wrap gap-2">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant={eatingOutFilter !== null ? "secondary" : "outline"}
+              size="sm"
+              className="h-8 text-xs gap-1"
+            >
+              {eatingOutFilter === null
+                ? "Out / In"
+                : eatingOutFilter
+                ? "Eating Out"
+                : "Eating In"}
+              <ChevronDown size={12} className="opacity-60" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            <DropdownMenuItem onClick={() => setEatingOutFilter(null)}>All</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setEatingOutFilter(true)}>Eating Out</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setEatingOutFilter(false)}>Eating In</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
-      {/* Controls */}
-      <div className="flex flex-col xs:flex-row gap-2 flex-wrap">
-        <Button onClick={onAddMeal}>Add New Meal <div className="text-xs italic">(Press 'N' key)</div></Button>
-        
-        <div className="flex gap-2 flex-1 flex-wrap">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant={mealTypeFilter !== null ? "secondary" : "outline"}
+              size="sm"
+              className="h-8 text-xs gap-1"
+            >
+              {mealTypeFilter ?? "Meal Type"}
+              <ChevronDown size={12} className="opacity-60" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            <DropdownMenuItem onClick={() => setMealTypeFilter(null)}>All</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setMealTypeFilter("Breakfast")}>Breakfast</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setMealTypeFilter("Lunch")}>Lunch</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setMealTypeFilter("Dinner")}>Dinner</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        {uniqueTags.length > 0 && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="flex items-center gap-1 flex-1 xs:flex-none">
-                <FilterIcon size={16} />
-                <span className="hidden xs:inline">Filter</span> Out/In
-                <ChevronDown size={14} className="opacity-70" />
+              <Button
+                variant={tagFilter !== null ? "secondary" : "outline"}
+                size="sm"
+                className="h-8 text-xs gap-1"
+              >
+                {tagFilter ?? "Tags"}
+                <ChevronDown size={12} className="opacity-60" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setEatingOutFilter(null)}>
-                All
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setEatingOutFilter(true)}>
-                Eating Out
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setEatingOutFilter(false)}>
-                Eating In
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="flex items-center gap-1 flex-1 xs:flex-none">
-                <FilterIcon size={16} />
-                <span className="hidden xs:inline">Filter</span> Type
-                <ChevronDown size={14} className="opacity-70" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setMealTypeFilter(null)}>
-                All
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setMealTypeFilter("Breakfast")}>
-                Breakfast
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setMealTypeFilter("Lunch")}>
-                Lunch
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setMealTypeFilter("Dinner")}>
-                Dinner
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="flex items-center gap-1 flex-1 xs:flex-none">
-                <FilterIcon size={16} />
-                <span className="hidden xs:inline">Filter</span> Tags
-                <ChevronDown size={14} className="opacity-70" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setTagFilter(null)}>
-                All Tags
-              </DropdownMenuItem>
+            <DropdownMenuContent align="start">
+              <DropdownMenuItem onClick={() => setTagFilter(null)}>All Tags</DropdownMenuItem>
               <Separator />
-              {Array.from(new Set(meals.flatMap(m => m.tags || []))).map(tag => (
+              {uniqueTags.map((tag) => (
                 <DropdownMenuItem key={tag} onClick={() => setTagFilter(tag)}>
                   {tag}
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
-          
-          <div className="ml-auto">
-            <ModeToggle />
-          </div>
-        </div>
+        )}
+
+        {hasActiveFilters && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 text-xs text-muted-foreground gap-1"
+            onClick={() => {
+              setMealTypeFilter(null);
+              setEatingOutFilter(null);
+              setTagFilter(null);
+            }}
+          >
+            <X size={12} /> Clear
+          </Button>
+        )}
       </div>
+
+      {/* Active filter badges */}
+      {hasActiveFilters && (
+        <div className="flex flex-wrap gap-1.5">
+          {mealTypeFilter && (
+            <Badge variant="secondary" className="text-xs gap-1 pr-1">
+              {mealTypeFilter}
+              <X size={11} className="cursor-pointer" onClick={() => setMealTypeFilter(null)} />
+            </Badge>
+          )}
+          {eatingOutFilter !== null && (
+            <Badge variant="secondary" className="text-xs gap-1 pr-1">
+              {eatingOutFilter ? "Out" : "In"}
+              <X size={11} className="cursor-pointer" onClick={() => setEatingOutFilter(null)} />
+            </Badge>
+          )}
+          {tagFilter && (
+            <Badge variant="secondary" className="text-xs gap-1 pr-1">
+              {tagFilter}
+              <X size={11} className="cursor-pointer" onClick={() => setTagFilter(null)} />
+            </Badge>
+          )}
+        </div>
+      )}
     </div>
   );
 };
 
-export default MealFilters; 
+export default MealFilters;
